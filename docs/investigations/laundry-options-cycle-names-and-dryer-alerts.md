@@ -77,17 +77,21 @@ SelectDesc(
 
 ### Soil Level: `SelectDesc` on `/washer/vs/0` (`WASHER_SETTINGS`)
 
-Exact mirror of the existing `rinse_cycles` descriptor — field plus
-live supported list, no new machinery (`translation_key` defaults to
-`key`, as with the other wash controls):
+Uses the shared course-narrowing machinery: a reported soil-level group
+limits the device's live supported list for the selected course, while a
+board that reports no group keeps its full list.
 
 ```python
 SelectDesc(
     key="soil_level",
     field="x.com.samsung.da.soilLevel",
-    icon="mdi:water-opacity",  # same family as the wash-control selects
+    icon="mdi:liquid-spot",
     entity_category="config",
-    options_field="x.com.samsung.da.supportedSoilLevel",
+    options=course_narrowed_options(
+        OPTION_KIND_SOIL,
+        "x.com.samsung.da.soilLevel",
+        "x.com.samsung.da.supportedSoilLevel",
+    ),
     exists_fn=_wash_control_present("soilLevel"),
     write_fn=lambda p, rep, href=None: (
         ["washer", "vs", "0"],
@@ -96,10 +100,9 @@ SelectDesc(
 )
 ```
 
-No `validate_fn`: no per-course availability bitmap for soil was
-observed, and `supportedSoilLevel` is already the board's own list.
-`_wash_control_present` keeps the phantom-guard other wash controls
-have (issue #475).
+No `validate_fn`: the board's supported list and optional course mask
+control the offered values. `_wash_control_present` keeps the phantom-guard
+other wash controls have (issue #475).
 
 ### Cycle names (translations-only)
 
@@ -248,7 +251,7 @@ patterns aren't this PR's to change). Verified live after restart:
   `normal`, `heavy`, `extra_heavy`), 14 new
   washer `Table_02` states plus the `57`/`5E` corrections, 7 new dryer
   `Table_03` states (`33/32/35/34/30/3e/2f`, physically confirmed).
-  No `icons.json` change (`mdi:water-opacity` descriptor icon is the
+  No `icons.json` change (`mdi:liquid-spot` descriptor icon is the
   mechanism; `icons.json` carries no `select` section).
 - `translations/{cs,de,es,it,ko,nl,pl,sk}.json`: best-effort drafts for
   all of the above are prepared (each locale follows its own file's
