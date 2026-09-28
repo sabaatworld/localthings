@@ -103,12 +103,11 @@ IGNORED: list[Capability] = [
     # washer.WASHER_COURSE at /course/vs/0 (same hex code, just prefixed
     # "Table_02_Course_").
     #
-    # Probe tier: courseTable determines the cycle select's translated states
-    # at registration, and Home Assistant persists that first resolution.
-    Capability(href="/st/washercourse/vs/0", poll_tier="probe"),
-    # Dryer counterpart: its courseTable supplies dryer_cycle's translated
-    # states at registration.
-    Capability(href="/st/dryercourse/vs/0", poll_tier="probe"),
+    # Course tables arrive in the initial device batch, so discovery has them
+    # before Home Assistant registers the cycle select's translated states.
+    Capability(href="/st/washercourse/vs/0"),
+    # Dryer counterpart: its courseTable supplies dryer_cycle's translated states.
+    Capability(href="/st/dryercourse/vs/0"),
     # AirDresser counterpart (issue #157): read only for its courseTable id
     # (air_dresser.AIR_DRESSER_COURSE's table_href), no entity of its own.
     Capability(href="/st/airdressercourse/vs/0"),

@@ -586,8 +586,17 @@ def _quick_wash(rep):
 
 
 def _washer_course_label(value, resources):
-    """Personal-course name, else raw code to avoid cosmetic splitting."""
-    return washer_cycle_fallback(value, resources) or value
+    """Personal-course name, else raw hex code to avoid cosmetic splitting."""
+    label = washer_cycle_fallback(value, resources)
+    if label is not None:
+        return label
+    if (
+        isinstance(value, str)
+        and len(value) == 2
+        and all(char in "0123456789abcdefABCDEF" for char in value)
+    ):
+        return value
+    return None
 
 
 WASHER_COURSE = Capability(
