@@ -628,6 +628,25 @@ class TestExtraRinse:
             translation_key = self._desc().validate_fn("On", rep, _LIVE_EDIT_COURSE_RESOURCES)
             assert translation_key == "extra_rinse_unavailable_for_cycle"
 
+    def test_rejects_unavailable_course_with_extra_edit_list_slot(self):
+        rep = {
+            "x.com.samsung.da.options": [
+                "Course_04",
+                "ExtraRinse_Off",
+                "ExtraRinseSet_F000F0F0",
+            ],
+            # Header 1 defines four 3-byte records (01, 04, 07, 0A). The
+            # edit list's extra 03 appears only in another valid split.
+            "x.com.samsung.da.supportedOptions": ["101A10304A20507A3090AA40B"],
+        }
+        resources = {
+            "/wm/editcourse/vs/0": {
+                "x.com.samsung.da.editCourseList": "EditCourseList_01030407090A",
+            },
+        }
+
+        assert self._desc().validate_fn("On", rep, resources) == "extra_rinse_unavailable_for_cycle"
+
     def test_turning_off_is_never_blocked(self):
         rep = _live_course_rep("58")
         assert self._desc().validate_fn("Off", rep, _LIVE_EDIT_COURSE_RESOURCES) is None
