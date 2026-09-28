@@ -1048,13 +1048,6 @@
           "left_narrow": "W lewo, wąsko",
           "left_wide": "W lewo, szeroko"
         }
-      },
-      "extra_rinse": {
-        "name": "Dodatkowe płukanie",
-        "state": {
-          "on": "Wł.",
-          "off": "Wył."
-        }
       }
     },
     "sensor": {
@@ -1545,6 +1538,9 @@
       }
     },
     "switch": {
+      "extra_rinse": {
+        "name": "Dodatkowe płukanie"
+      },
       "night_lighting_schedule": {
         "name": "Harmonogram oświetlenia nocnego"
       },

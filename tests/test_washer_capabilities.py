@@ -8,7 +8,7 @@ fallback pairs and the energy meter in test_common_capabilities.py.
 from datetime import UTC
 
 from custom_components.localthings.registry.capabilities import washer
-from custom_components.localthings.registry.entities import SelectDesc
+from custom_components.localthings.registry.entities import SelectDesc, SwitchDesc
 from tests.conftest import _load_device
 
 
@@ -499,6 +499,11 @@ _EDIT_COURSE_RESOURCES = {
 _BUBBLE_SOAK_SET = "BubbleSoakSet_00F000F000F000F0F0F0F00000F000F0F00000F000000000"
 _PRE_WASH_AVAILABLE_SET = "PreWashAvailableSet_F0F000F0F0F000F0F0F0F00000F0F0F0F00000F000000000"
 _INTENSIVE_AVAILABLE_SET = "IntensiveAvailableSet_F0F000F0F0F000F0F0F0F00000F0F0F0F00000F000000000"
+_WASH_OPTION_RESOURCES = {
+    "/course/vs/0": {
+        "x.com.samsung.da.supportedOptions": ["11C0000300000"],
+    },
+}
 
 
 class TestWashOptionToggleValidation:
@@ -512,12 +517,12 @@ class TestWashOptionToggleValidation:
         return next(e for e in washer.WASHER_COURSE.entities if e.key == key)
 
     def test_allowed_on_a_supported_course(self):
-        rep = {"x.com.samsung.da.options": ["Course_30", _BUBBLE_SOAK_SET]}
-        assert self._desc("bubble_soak").validate_fn("On", rep, _EDIT_COURSE_RESOURCES) is None
+        rep = {"x.com.samsung.da.options": ["Course_30", "BubbleSoakSet_00F0"]}
+        assert self._desc("bubble_soak").validate_fn("On", rep, _WASH_OPTION_RESOURCES) is None
 
     def test_rejected_on_an_unsupported_course(self):
-        rep = {"x.com.samsung.da.options": ["Course_1C", _BUBBLE_SOAK_SET]}
-        translation_key = self._desc("bubble_soak").validate_fn("On", rep, _EDIT_COURSE_RESOURCES)
+        rep = {"x.com.samsung.da.options": ["Course_1C", "BubbleSoakSet_00F0"]}
+        translation_key = self._desc("bubble_soak").validate_fn("On", rep, _WASH_OPTION_RESOURCES)
         assert translation_key == "bubble_soak_unavailable_for_cycle"
 
     def test_bytes_follow_supported_options_order_not_edit_course_list(self):
@@ -544,19 +549,18 @@ class TestWashOptionToggleValidation:
         assert attributes({}, {}) == {"course_supported": None}
 
     def test_pre_wash_and_intensive_use_their_own_availableset_field(self):
-        rep = {"x.com.samsung.da.options": ["Course_30", _PRE_WASH_AVAILABLE_SET]}
-        assert self._desc("pre_wash").validate_fn("On", rep, _EDIT_COURSE_RESOURCES) is None
-        rep = {"x.com.samsung.da.options": ["Course_30", _INTENSIVE_AVAILABLE_SET]}
-        assert self._desc("intensive").validate_fn("On", rep, _EDIT_COURSE_RESOURCES) is None
+        rep = {"x.com.samsung.da.options": ["Course_30", "PreWashAvailableSet_00F0"]}
+        assert self._desc("pre_wash").validate_fn("On", rep, _WASH_OPTION_RESOURCES) is None
+        rep = {"x.com.samsung.da.options": ["Course_30", "IntensiveAvailableSet_00F0"]}
+        assert self._desc("intensive").validate_fn("On", rep, _WASH_OPTION_RESOURCES) is None
 
     def test_turning_off_is_never_blocked(self):
-        rep = {"x.com.samsung.da.options": ["Course_1C", _BUBBLE_SOAK_SET]}
-        assert self._desc("bubble_soak").validate_fn("Off", rep, _EDIT_COURSE_RESOURCES) is None
+        rep = {"x.com.samsung.da.options": ["Course_1C", "BubbleSoakSet_00F0"]}
+        assert self._desc("bubble_soak").validate_fn("Off", rep, _WASH_OPTION_RESOURCES) is None
 
     def test_allows_write_when_course_unresolvable(self):
-        """No editCourseList, no Course_ token, or a bitmap whose length
-        doesn't match editCourseList -- in every case, fail open rather than
-        block a write we can't actually verify."""
+        """Missing course data, a Course token, or a mismatched bitmap must
+        fail open rather than block a write we can't verify."""
         desc = self._desc("bubble_soak")
         rep = {"x.com.samsung.da.options": ["Course_1C", _BUBBLE_SOAK_SET]}
         assert desc.validate_fn("On", rep, {}) is None
@@ -589,7 +593,7 @@ def _live_course_rep(course, extra="ExtraRinse_Off"):
 
 
 class TestExtraRinse:
-    """Extra Rinse select over /course/vs/0's options[] array."""
+    """Extra Rinse switch over /course/vs/0's options[] array."""
 
     @staticmethod
     def _desc():
@@ -600,9 +604,12 @@ class TestExtraRinse:
         rep = {"x.com.samsung.da.options": ["ExtraRinse_Off"]}
         assert self._desc().exists_fn(rep, {}) is True
 
+    def test_is_a_switch(self):
+        assert isinstance(self._desc(), SwitchDesc)
+
     def test_reads_on_and_off(self):
-        assert self._desc().rep_fn({"x.com.samsung.da.options": ["ExtraRinse_On"]}) == "On"
-        assert self._desc().rep_fn({"x.com.samsung.da.options": ["ExtraRinse_Off"]}) == "Off"
+        assert self._desc().rep_fn({"x.com.samsung.da.options": ["ExtraRinse_On"]}) is True
+        assert self._desc().rep_fn({"x.com.samsung.da.options": ["ExtraRinse_Off"]}) is False
 
     def test_write_carries_only_the_changed_token(self):
         rep = {"x.com.samsung.da.options": ["ExtraRinse_Off", "GMT_F2"]}
@@ -627,6 +634,16 @@ class TestExtraRinse:
             rep = _live_course_rep(course)
             translation_key = self._desc().validate_fn("On", rep, _LIVE_EDIT_COURSE_RESOURCES)
             assert translation_key == "extra_rinse_unavailable_for_cycle"
+
+    def test_course_supported_attribute(self):
+        attributes = self._desc().extra_state_attributes_fn
+
+        assert attributes(_live_course_rep("01"), _LIVE_EDIT_COURSE_RESOURCES) == {
+            "course_supported": True,
+        }
+        assert attributes(_live_course_rep("58"), _LIVE_EDIT_COURSE_RESOURCES) == {
+            "course_supported": False,
+        }
 
     def test_rejects_unavailable_course_with_extra_edit_list_slot(self):
         rep = {
@@ -653,11 +670,46 @@ class TestExtraRinse:
 
     def test_allows_write_when_availability_unresolvable(self):
         desc = self._desc()
-        rep = _live_course_rep("01")
-        assert desc.validate_fn("On", rep, {}) is None
-
         rep = {"x.com.samsung.da.options": ["Course_01"]}
         assert desc.validate_fn("On", rep, _LIVE_EDIT_COURSE_RESOURCES) is None
+
+        # An edit-course list has a different order, so it must not decide a
+        # positional availability bitmap when supportedOptions is absent.
+        rep = {
+            "x.com.samsung.da.options": [
+                "Course_01",
+                "ExtraRinse_Off",
+                "ExtraRinseSet_00F0",
+            ],
+        }
+        edit_only_resources = {
+            "/wm/editcourse/vs/0": {
+                "x.com.samsung.da.editCourseList": "EditCourseList_0104",
+            },
+        }
+        assert desc.validate_fn("On", rep, edit_only_resources) is None
+
+    def test_allows_write_when_supported_options_is_malformed(self):
+        rep = {
+            "x.com.samsung.da.options": [
+                "Course_01",
+                "ExtraRinse_Off",
+                "ExtraRinseSet_00F0",
+            ],
+        }
+        malformed_resources = {
+            "/course/vs/0": {
+                "x.com.samsung.da.supportedOptions": ["101GGGG04GGGG"],
+            },
+        }
+
+        assert self._desc().validate_fn("On", rep, malformed_resources) is None
+
+    def test_allows_write_when_availability_bitmap_is_malformed(self):
+        rep = _live_course_rep("01")
+        rep["x.com.samsung.da.options"][-1] = "ExtraRinseSet_GG" + "F0" * 24
+
+        assert self._desc().validate_fn("On", rep, _LIVE_EDIT_COURSE_RESOURCES) is None
 
 
 class TestSoilLevel:

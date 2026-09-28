@@ -27,10 +27,7 @@ from .laundry import (
     _course_codes_from_supported_options,
     bool_option_exists,
     bool_option_switch,
-    bool_option_write,
     course_narrowed_options,
-    course_record_order,
-    cycle_options,
     cycle_select,
     drum_clean_cycles_remaining,
     drum_clean_last_cleaned,
@@ -390,12 +387,26 @@ def _bool_option_switch(key, icon, prefix, availability_field):
         or mismatched-length bitmap)."""
         opts = rep.get("x.com.samsung.da.options") or []
         current = option_value(opts, "Course")
-        course_rep = resources.get("/course/vs/0") or {}
-        courses = _course_codes_from_supported_options(course_rep) or cycle_options(resources)
+        course_rep = resources.get("/course/vs/0") or rep
+        supported_options = course_rep.get("x.com.samsung.da.supportedOptions")
+        course_table = (
+            supported_options[0]
+            if isinstance(supported_options, list) and supported_options
+            else supported_options
+        )
+        if not isinstance(course_table, str) or not all(
+            char in "0123456789abcdefABCDEF" for char in course_table
+        ):
+            return None
+        courses = _course_codes_from_supported_options(course_rep)
         if not current or current not in courses:
             return None
         raw = option_value(opts, availability_field)
-        if raw is None:
+        if (
+            not isinstance(raw, str)
+            or len(raw) % 2
+            or not all(char in "0123456789abcdefABCDEF" for char in raw)
+        ):
             return None
         pairs = hex_pairs(raw)
         if len(pairs) != len(courses):
@@ -428,27 +439,6 @@ def _bool_option_switch(key, icon, prefix, availability_field):
         validate_fn=validate,
         extra_state_attributes_fn=extra_attributes,
     )
-
-
-def _extra_rinse_validate(p, rep, resources):
-    """Reject Extra Rinse on when its availability byte is not F0.
-
-    Uses supportedOptions record order and fails open on unavailable data.
-    """
-    if p != "On":
-        return None
-    opts = rep.get("x.com.samsung.da.options") or []
-    current = option_value(opts, "Course")
-    order = course_record_order(rep, resources)
-    raw = option_value(opts, "ExtraRinseSet")
-    if not current or raw is None:
-        return None
-    pairs = hex_pairs(raw)
-    if current not in order or len(pairs) != len(order):
-        return None
-    if pairs[order.index(current)] != "F0":
-        return "extra_rinse_unavailable_for_cycle"
-    return None
 
 
 # AddWash -- the little door for adding a forgotten sock mid-cycle -- rides
@@ -610,18 +600,7 @@ WASHER_COURSE = Capability(
             table_href="/st/washercourse/vs/0",
             display_fn=_washer_course_label,
         ),
-        SelectDesc(
-            key="extra_rinse",
-            translation_key="extra_rinse",
-            icon="mdi:water-plus",
-            entity_category="config",
-            # Static: no supportedExtraRinse list exists on any dump.
-            options=("On", "Off"),
-            exists_fn=bool_option_exists("ExtraRinse"),
-            rep_fn=lambda rep: option_value(rep.get("x.com.samsung.da.options"), "ExtraRinse"),
-            write_fn=bool_option_write("ExtraRinse"),
-            validate_fn=_extra_rinse_validate,
-        ),
+        _bool_option_switch("extra_rinse", "mdi:water-plus", "ExtraRinse", "ExtraRinseSet"),
         SensorDesc(
             key="drum_clean_cycles_remaining",
             unit="cycles",

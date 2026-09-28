@@ -396,16 +396,6 @@ def _course_records(course_rep, must_cover=None):
     return fallback or {}
 
 
-def course_record_order(course_rep, _resources):
-    """Course codes in supportedOptions record order.
-
-    Availability bitmaps such as ExtraRinseSet are positional with these
-    records, not with editCourseList. See
-    docs/investigations/laundry-options-cycle-names-and-dryer-alerts.md.
-    """
-    return list(_course_records(course_rep))
-
-
 def course_option_mask(resources, kind, course=None):
     """(default index, allowed indices) for `kind` on the selected course.
 

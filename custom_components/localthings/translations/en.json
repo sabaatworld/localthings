@@ -1038,13 +1038,6 @@
           "left_wide": "Left wide"
         }
       },
-      "extra_rinse": {
-        "name": "Extra rinse",
-        "state": {
-          "on": "On",
-          "off": "Off"
-        }
-      },
       "soil_level": {
         "name": "Soil level",
         "state": {
@@ -1545,6 +1538,9 @@
       }
     },
     "switch": {
+      "extra_rinse": {
+        "name": "Extra rinse"
+      },
       "night_lighting_schedule": {
         "name": "Night lighting schedule"
       },

@@ -1038,13 +1038,6 @@
           "left_wide": "왼쪽 넓게"
         }
       },
-      "extra_rinse": {
-        "name": "헹굼 추가",
-        "state": {
-          "on": "켜기",
-          "off": "끄기"
-        }
-      },
       "soil_level": {
         "name": "오염도",
         "state": {
@@ -1545,6 +1538,9 @@
       }
     },
     "switch": {
+      "extra_rinse": {
+        "name": "헹굼 추가"
+      },
       "night_lighting_schedule": {
         "name": "야간 조명 일정"
       },

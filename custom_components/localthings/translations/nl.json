@@ -1038,13 +1038,6 @@
           "left_wide": "Links breed"
         }
       },
-      "extra_rinse": {
-        "name": "Extra spoelen",
-        "state": {
-          "on": "Aan",
-          "off": "Uit"
-        }
-      },
       "soil_level": {
         "name": "Vervuilingsgraad",
         "state": {
@@ -1545,6 +1538,9 @@
       }
     },
     "switch": {
+      "extra_rinse": {
+        "name": "Extra spoelen"
+      },
       "night_lighting_schedule": {
         "name": "Schema nachtverlichting"
       },

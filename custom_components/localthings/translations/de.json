@@ -1038,13 +1038,6 @@
           "left_wide": "Links weit"
         }
       },
-      "extra_rinse": {
-        "name": "Extra-Spülen",
-        "state": {
-          "on": "Ein",
-          "off": "Aus"
-        }
-      },
       "soil_level": {
         "name": "Verschmutzungsgrad",
         "state": {
@@ -1545,6 +1538,9 @@
       }
     },
     "switch": {
+      "extra_rinse": {
+        "name": "Extra-Spülen"
+      },
       "night_lighting_schedule": {
         "name": "Zeitplan für Nachtbeleuchtung"
       },

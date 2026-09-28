@@ -1379,13 +1379,6 @@
           "left_wide": "Izquierda amplia"
         }
       },
-      "extra_rinse": {
-        "name": "Aclarado extra",
-        "state": {
-          "on": "Encendido",
-          "off": "Apagado"
-        }
-      },
       "soil_level": {
         "name": "Nivel de suciedad",
         "state": {
@@ -1886,6 +1879,9 @@
       }
     },
     "switch": {
+      "extra_rinse": {
+        "name": "Aclarado extra"
+      },
       "night_lighting_schedule": {
         "name": "Horario de iluminación nocturna"
       },

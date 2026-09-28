@@ -1038,13 +1038,6 @@
           "left_wide": "Vľavo široko"
         }
       },
-      "extra_rinse": {
-        "name": "Extra plákanie",
-        "state": {
-          "on": "Zapnuté",
-          "off": "Vypnuté"
-        }
-      },
       "soil_level": {
         "name": "Stupeň znečistenia",
         "state": {
@@ -1545,6 +1538,9 @@
       }
     },
     "switch": {
+      "extra_rinse": {
+        "name": "Extra plákanie"
+      },
       "night_lighting_schedule": {
         "name": "Plán nočného osvetlenia"
       },
