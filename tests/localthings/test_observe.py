@@ -102,15 +102,17 @@ def test_apply_fully_replaces_alarms_href_for_subdevice_shapes():
         assert mgr.cache.get(href) == {}
 
 
-def test_apply_drops_update_during_settle_window():
+def test_settle_guard_without_body_holds_nothing():
+    """A guard armed without write context (body=None) holds nothing: there
+    are no written values to protect, so updates flow through normally."""
     mgr = _manager()
     mgr.cache.apply_rep("/oven/vs/0", {"a": 1}, source="seed")
     mgr.mark_write_pending("/oven/vs/0", settle_s=1.0)
 
     result = mgr.apply("/oven/vs/0", {"a": 2}, source="poll")
 
-    assert result is False
-    assert mgr.cache.get("/oven/vs/0") == {"a": 1}
+    assert result is True
+    assert mgr.cache.get("/oven/vs/0") == {"a": 2}
 
 
 def test_apply_optimistic_bypasses_an_in_progress_settle_window():
@@ -130,11 +132,6 @@ def test_apply_optimistic_bypasses_an_in_progress_settle_window():
 
     assert result is True
     assert mgr.cache.get("/course/vs/0") == {"Course": "1C", "Detergent": "2"}
-
-    # A poll/sweep/observe update racing in right behind it is still
-    # gated -- the second write's own guard (re-armed by mark_write_pending,
-    # not exercised directly here) is what protects it going forward.
-    assert mgr.apply("/course/vs/0", {"Detergent": "1"}, source="poll") is False
 
 
 def test_apply_accepts_update_after_settle_window_elapses():
@@ -702,3 +699,409 @@ def test_on_notification_applies_rep_when_rt_matches_or_is_absent():
 
     mgr.on_notification("/mode/vs/0", cbor2.dumps({"x.com.samsung.da.modes": ["Dry"]}))
     assert (mgr.cache.get("/mode/vs/0") or {}).get("x.com.samsung.da.modes") == ["Dry"]
+
+
+def test_observe_single_token_options_delta_preserves_siblings():
+    """Washer repro: a physical-panel change arrives as an OBSERVE notify
+    carrying only the changed options[] token. Merging that array verbatim
+    wipes every sibling token, so Cycle/ExtraRinse/softener entities read
+    None and render unknown until the next full poll."""
+    mgr = _manager()
+    href = "/course/vs/0"
+    mgr.apply(
+        href,
+        {
+            "x.com.samsung.da.options": [
+                "Course_01",
+                "ExtraRinse_On",
+                "DetergentLevelCtrl_3",
+                "SoftenerLevelCtrl_0",
+                "WashingTimes_17",
+                "DrumCleanProposal_40",
+            ],
+            "x.com.samsung.da.supportedOptions": ["300122"],
+        },
+        source="poll",
+    )
+
+    mgr.apply(
+        href,
+        {
+            "x.com.samsung.da.options": ["DetergentLevelCtrl_0"],
+            "x.com.samsung.da.supportedOptions": ["300122"],
+        },
+        source="observe",
+    )
+
+    cached = mgr.cache.get(href) or {}
+    assert cached["x.com.samsung.da.options"] == [
+        "Course_01",
+        "ExtraRinse_On",
+        "DetergentLevelCtrl_0",
+        "SoftenerLevelCtrl_0",
+        "WashingTimes_17",
+        "DrumCleanProposal_40",
+    ]
+
+
+def test_observe_nested_dict_delta_preserves_sibling_fields():
+    """Partial reps nest: a dict inside the rep must merge recursively, not
+    replace wholesale, on partial sources."""
+    mgr = _manager()
+    href = "/mode/vs/0"
+    mgr.apply(href, {"config": {"a": 1, "b": 2}, "other": "kept"}, source="poll")
+
+    mgr.apply(href, {"config": {"b": 3}}, source="observe")
+
+    assert mgr.cache.get(href) == {"config": {"a": 1, "b": 3}, "other": "kept"}
+
+
+def test_observe_items_delta_merges_recursively_by_id():
+    """items[] entries are keyed by x.com.samsung.da.id; a partial item
+    update must merge into the cached item (recursively), not replace it."""
+    mgr = _manager()
+    href = "/temperatures/vs/0"
+    mgr.apply(
+        href,
+        {
+            "x.com.samsung.da.items": [
+                {
+                    "x.com.samsung.da.id": "0",
+                    "x.com.samsung.da.current": "20.0",
+                    "x.com.samsung.da.desired": "22",
+                    "nested": {"x": 1, "y": 2},
+                }
+            ]
+        },
+        source="poll",
+    )
+
+    mgr.apply(
+        href,
+        {
+            "x.com.samsung.da.items": [
+                {"x.com.samsung.da.id": "0", "x.com.samsung.da.desired": "23", "nested": {"y": 3}}
+            ]
+        },
+        source="observe",
+    )
+
+    assert mgr.cache.get(href) == {
+        "x.com.samsung.da.items": [
+            {
+                "x.com.samsung.da.id": "0",
+                "x.com.samsung.da.current": "20.0",
+                "x.com.samsung.da.desired": "23",
+                "nested": {"x": 1, "y": 3},
+            }
+        ]
+    }
+
+
+def test_observe_ordinary_lists_replace_while_absent_fields_survive():
+    """Non-keyed lists are snapshots: a present list replaces, an absent
+    field stays cached."""
+    mgr = _manager()
+    href = "/mode/vs/0"
+    mgr.apply(
+        href,
+        {
+            "x.com.samsung.da.modes": ["A", "B"],
+            "x.com.samsung.da.supportedModes": ["A", "B", "C"],
+        },
+        source="poll",
+    )
+
+    mgr.apply(href, {"x.com.samsung.da.modes": ["B"]}, source="observe")
+
+    cached = mgr.cache.get(href) or {}
+    assert cached["x.com.samsung.da.modes"] == ["B"]
+    assert cached["x.com.samsung.da.supportedModes"] == ["A", "B", "C"]
+
+
+def test_poll_single_token_options_array_stays_authoritative():
+    """Poll/direct-read arrays stay authoritative: a full GET that names one
+    token means one token. Only partial sources (observe/optimistic) merge
+    by prefix, so stale tokens can still age out on the next real read."""
+    mgr = _manager()
+    href = "/course/vs/0"
+    mgr.apply(
+        href,
+        {"x.com.samsung.da.options": ["Course_01", "ExtraRinse_On"]},
+        source="poll",
+    )
+
+    mgr.apply(href, {"x.com.samsung.da.options": ["Course_01"]}, source="poll")
+
+    assert (mgr.cache.get(href) or {})["x.com.samsung.da.options"] == ["Course_01"]
+
+
+def test_sweep_single_token_options_array_stays_authoritative():
+    """The /device/0 sweep is a full snapshot like a poll: a one-token
+    options[] there replaces rather than merges, so retired tokens still
+    age out on the summary poll. Load-bearing contract -- if a batch entry
+    is ever observed carrying a partial options[] array, the merge branch
+    must cover sweep too."""
+    mgr = _manager()
+    href = "/course/vs/0"
+    mgr.apply(
+        href,
+        {"x.com.samsung.da.options": ["Course_01", "ExtraRinse_On"]},
+        source="poll",
+    )
+
+    mgr.apply(href, {"x.com.samsung.da.options": ["Course_01"]}, source="sweep")
+
+    assert (mgr.cache.get(href) or {})["x.com.samsung.da.options"] == ["Course_01"]
+
+
+def test_optimistic_single_token_options_delta_preserves_siblings():
+    """The coordinator's own writes take the same partial path as panel
+    notifies: a one-token optimistic body must merge, not replace."""
+    mgr = _manager()
+    href = "/course/vs/0"
+    mgr.apply(
+        href,
+        {
+            "x.com.samsung.da.options": [
+                "Course_01",
+                "ExtraRinse_On",
+                "DetergentLevelCtrl_3",
+            ],
+        },
+        source="poll",
+    )
+
+    mgr.apply(
+        href,
+        {"x.com.samsung.da.options": ["DetergentLevelCtrl_0"]},
+        source="optimistic",
+    )
+
+    assert (mgr.cache.get(href) or {})["x.com.samsung.da.options"] == [
+        "Course_01",
+        "ExtraRinse_On",
+        "DetergentLevelCtrl_0",
+    ]
+
+
+def test_observe_items_without_ids_replace_verbatim():
+    """Items keyed by description/type/name instead of x.com.samsung.da.id
+    (fridge temperatures, sensors) are snapshots: a partial notify must
+    not merge one slot's reading into another."""
+    mgr = _manager()
+    href = "/temperatures/vs/0"
+    mgr.apply(
+        href,
+        {
+            "x.com.samsung.da.items": [
+                {"x.com.samsung.da.description": "Fridge", "x.com.samsung.da.current": "3"},
+                {"x.com.samsung.da.description": "Freezer", "x.com.samsung.da.current": "-19"},
+            ]
+        },
+        source="poll",
+    )
+
+    mgr.apply(
+        href,
+        {
+            "x.com.samsung.da.items": [
+                {"x.com.samsung.da.description": "Fridge", "x.com.samsung.da.current": "4"},
+            ]
+        },
+        source="observe",
+    )
+
+    assert mgr.cache.get(href) == {
+        "x.com.samsung.da.items": [
+            {"x.com.samsung.da.description": "Fridge", "x.com.samsung.da.current": "4"},
+        ]
+    }
+
+
+def test_partial_merge_does_not_alias_caller_containers():
+    """Mutating a partial rep after apply must not mutate cached state."""
+    mgr = _manager()
+    href = "/mode/vs/0"
+    mgr.apply(href, {"nested": {"a": 1}}, source="poll")
+
+    delta = {"x.com.samsung.da.modes": ["Dry"], "nested": {"b": 2}}
+    mgr.apply(href, delta, source="observe")
+    delta["x.com.samsung.da.modes"].append("Fan")
+    delta["nested"]["b"] = 3
+
+    cached = mgr.cache.get(href) or {}
+    assert cached["x.com.samsung.da.modes"] == ["Dry"]
+    assert cached["nested"] == {"a": 1, "b": 2}
+
+
+def test_settle_holds_stale_echo_of_written_token():
+    """A write to one options[] token must hold that token against the
+    device's pre-write value during the settle window, so a slow-to-settle
+    device doesn't revert it (issue #9) -- without blocking sibling tokens."""
+    mgr = _manager()
+    href = "/course/vs/0"
+    full = {"x.com.samsung.da.options": ["Course_01", "ExtraRinse_Off", "DetergentLevelCtrl_3"]}
+    mgr.apply(href, full, source="poll")
+    body = {"x.com.samsung.da.options": ["ExtraRinse_On"]}
+    mgr.apply(href, body, source="optimistic")
+    mgr.mark_write_pending(href, body=body, before=full, settle_s=30.0)
+
+    # Stale poll: device hasn't settled, still reports the pre-write token.
+    mgr.apply(
+        href,
+        {"x.com.samsung.da.options": ["Course_01", "ExtraRinse_Off", "DetergentLevelCtrl_3"]},
+        source="poll",
+    )
+
+    assert (mgr.cache.get(href) or {})["x.com.samsung.da.options"] == [
+        "Course_01",
+        "ExtraRinse_On",
+        "DetergentLevelCtrl_3",
+    ]
+
+
+def test_settle_lets_unrelated_token_change_through():
+    """A physical-panel change to a *different* token on the same href must
+    pass through the settle guard immediately, not be dropped for the whole
+    window (the delayed-Cycle bug)."""
+    mgr = _manager()
+    href = "/course/vs/0"
+    full = {"x.com.samsung.da.options": ["Course_01", "ExtraRinse_Off", "DetergentLevelCtrl_3"]}
+    mgr.apply(href, full, source="poll")
+    mgr.apply(href, {"x.com.samsung.da.options": ["ExtraRinse_On"]}, source="optimistic")
+    mgr.mark_write_pending(
+        href, body={"x.com.samsung.da.options": ["ExtraRinse_On"]}, before=full, settle_s=30.0
+    )
+
+    mgr.apply(href, {"x.com.samsung.da.options": ["Course_57"]}, source="observe")
+
+    assert (mgr.cache.get(href) or {})["x.com.samsung.da.options"] == [
+        "Course_57",
+        "ExtraRinse_On",
+        "DetergentLevelCtrl_3",
+    ]
+
+
+def test_settle_accepts_third_value_for_written_token():
+    """If the user changes the same token again on the panel (a third value,
+    neither the pre-write nor the written value), it supersedes the write."""
+    mgr = _manager()
+    href = "/course/vs/0"
+    full = {"x.com.samsung.da.options": ["Course_01", "DetergentLevelCtrl_3"]}
+    mgr.apply(href, full, source="poll")
+    mgr.apply(href, {"x.com.samsung.da.options": ["DetergentLevelCtrl_1"]}, source="optimistic")
+    mgr.mark_write_pending(
+        href,
+        body={"x.com.samsung.da.options": ["DetergentLevelCtrl_1"]},
+        before=full,
+        settle_s=30.0,
+    )
+
+    mgr.apply(href, {"x.com.samsung.da.options": ["DetergentLevelCtrl_2"]}, source="observe")
+
+    assert (mgr.cache.get(href) or {})["x.com.samsung.da.options"] == [
+        "Course_01",
+        "DetergentLevelCtrl_2",
+    ]
+
+
+def test_settle_holds_stale_scalar_field():
+    """A scalar write (e.g. power) holds against its stale pre-write value
+    during settle, even when the pre-write cache is empty."""
+    mgr = _manager()
+    href = "/power/vs/0"
+    mgr.apply(href, {"x.com.samsung.da.power": "Off"}, source="poll")
+    mgr.apply(href, {"x.com.samsung.da.power": "On"}, source="optimistic")
+    mgr.mark_write_pending(
+        href,
+        body={"x.com.samsung.da.power": "On"},
+        before={"x.com.samsung.da.power": "Off"},
+        settle_s=30.0,
+    )
+
+    mgr.apply(href, {"x.com.samsung.da.power": "Off"}, source="poll")
+
+    assert (mgr.cache.get(href) or {})["x.com.samsung.da.power"] == "On"
+
+
+def test_settle_guard_expires_and_stale_echo_then_applies():
+    """Once the settle window lapses, a stale echo is no longer held: the
+    write is treated as not-taken and the device's value wins."""
+    mgr = _manager()
+    href = "/power/vs/0"
+    mgr.apply(href, {"x.com.samsung.da.power": "On"}, source="optimistic")
+    mgr.mark_write_pending(
+        href,
+        body={"x.com.samsung.da.power": "On"},
+        before={"x.com.samsung.da.power": "Off"},
+        settle_s=0.05,
+    )
+    time.sleep(0.1)
+
+    mgr.apply(href, {"x.com.samsung.da.power": "Off"}, source="poll")
+
+    assert (mgr.cache.get(href) or {})["x.com.samsung.da.power"] == "Off"
+
+
+def test_settle_holds_a_written_token_absent_from_stale_candidate():
+    """A write that adds a brand-new options token must hold it even when the
+    stale full read omits the token (the device hasn't reported it yet),
+    mirroring the scalar unknown-old fallback."""
+    mgr = _manager()
+    href = "/course/vs/0"
+    full = {"x.com.samsung.da.options": ["Course_01"]}
+    mgr.apply(href, full, source="poll")
+    body = {"x.com.samsung.da.options": ["DetergentLevelCtrl_1"]}
+    mgr.apply(href, body, source="optimistic")
+    mgr.mark_write_pending(href, body=body, before=full, settle_s=30.0)
+
+    mgr.apply(href, {"x.com.samsung.da.options": ["Course_01"]}, source="poll")
+
+    cached = (mgr.cache.get(href) or {})["x.com.samsung.da.options"]
+    assert "Course_01" in cached
+    assert "DetergentLevelCtrl_1" in cached
+
+
+def test_settle_holds_a_written_item_absent_from_stale_candidate():
+    """A write that adds a brand-new items[] id must hold it even when the
+    stale full read omits the item."""
+    mgr = _manager()
+    href = "/temperatures/vs/0"
+    full = {
+        "x.com.samsung.da.items": [{"x.com.samsung.da.id": "0", "x.com.samsung.da.desired": "20"}]
+    }
+    mgr.apply(href, full, source="poll")
+    body = {
+        "x.com.samsung.da.items": [{"x.com.samsung.da.id": "1", "x.com.samsung.da.desired": "22"}]
+    }
+    mgr.apply(href, body, source="optimistic")
+    mgr.mark_write_pending(href, body=body, before=full, settle_s=30.0)
+
+    mgr.apply(
+        href,
+        {
+            "x.com.samsung.da.items": [
+                {"x.com.samsung.da.id": "0", "x.com.samsung.da.desired": "20"}
+            ]
+        },
+        source="poll",
+    )
+
+    ids = [i["x.com.samsung.da.id"] for i in (mgr.cache.get(href) or {})["x.com.samsung.da.items"]]
+    assert "1" in ids
+
+
+def test_settle_holds_a_nested_dict_write_field():
+    """A write to a nested dict field holds that field while a sibling field
+    changes, mirroring the merge's recursive handling."""
+    mgr = _manager()
+    href = "/mode/vs/0"
+    full = {"config": {"a": 1, "b": 2}, "other": "x"}
+    mgr.apply(href, full, source="poll")
+    mgr.apply(href, {"config": {"b": 3}}, source="optimistic")
+    mgr.mark_write_pending(href, body={"config": {"b": 3}}, before=full, settle_s=30.0)
+
+    mgr.apply(href, {"config": {"a": 1, "b": 2}, "other": "x"}, source="poll")
+
+    assert (mgr.cache.get(href) or {})["config"] == {"a": 1, "b": 3}
