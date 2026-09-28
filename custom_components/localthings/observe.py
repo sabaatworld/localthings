@@ -20,6 +20,8 @@ import cbor2
 from smartthings_local.ocf.observe_refresh import ObserveRefreshTask
 from smartthings_local.ocf.state_cache import StateCache
 
+from .registry.partial_merge import hold_written_values, merge_partial_rep
+
 _LOGGER = logging.getLogger(__name__)
 
 REFRESH_INTERVAL_S = 6 * 3600.0
@@ -87,6 +89,11 @@ class ObserveManager:
         self.last_mode_change_ts = time.monotonic()
         self.last_mode_change_wall = time.time()
         self._settle_until: dict[str, float] = {}
+        # Per href, the active write guards: (body, before, until) tuples
+        # holding the write body and the pre-write rep so apply() can hold
+        # written values against a stale echo instead of dropping the whole
+        # href. Guarded by _settle_lock.
+        self._settle_guards: dict[str, list[tuple[dict, dict, float]]] = {}
         self._settle_lock = threading.Lock()
         self._cache_lock = threading.Lock()
         self.subscribed_hrefs: set[str] = set()
@@ -121,9 +128,44 @@ class ObserveManager:
         """
         self._on_applied = callback
 
-    def mark_write_pending(self, href: str, settle_s: float = DEFAULT_SETTLE_S) -> None:
+    def mark_write_pending(
+        self,
+        href: str,
+        settle_s: float = DEFAULT_SETTLE_S,
+        body: dict | None = None,
+        before: dict | None = None,
+    ) -> None:
+        """Arm the write-settle guard on `href`.
+
+        `body` is the write body and `before` the pre-write cached rep; both
+        let apply() hold the written values against a stale echo rather than
+        drop every update to the href. `body=None` arms a time-only guard
+        (used by tests) that holds nothing.
+        """
         with self._settle_lock:
-            self._settle_until[href] = time.monotonic() + settle_s
+            until = time.monotonic() + settle_s
+            self._settle_until[href] = until
+            if body is not None:
+                self._settle_guards.setdefault(href, []).append((body, before or {}, until))
+
+    def _hold_written(self, href: str, candidate: dict) -> dict:
+        """Reconcile `candidate` against every active write guard on `href`,
+        holding written values that would otherwise revert to their
+        pre-write state. Expired guards are dropped."""
+        with self._settle_lock:
+            guards = self._settle_guards.get(href)
+            if not guards:
+                return candidate
+            now = time.monotonic()
+            active = [g for g in guards if g[2] > now]
+            if active:
+                self._settle_guards[href] = active
+            else:
+                self._settle_guards.pop(href, None)
+        out = candidate
+        for body, before, _until in active:
+            out = hold_written_values(out, before, body)
+        return out
 
     def _is_settling(self, href: str) -> bool:
         with self._settle_lock:
@@ -186,12 +228,30 @@ class ObserveManager:
         second selection from the cache until the first write's guard
         happened to expire, i.e. the exact symptom this guard exists to
         prevent, just relocated to whichever write loses the race.
+
+        Partial sources (observe notifies from a physical-panel change,
+        optimistic appliers of this integration's own writes) merge
+        recursively: dicts recurse, options[] merges by token prefix and
+        items[] by item id, everything else replaces. A panel change
+        arrives carrying only its own token, and a verbatim array replace
+        would wipe every sibling setting to unknown until the next full
+        poll. Poll/sweep/direct reads stay on the shallow top-level merge
+        so a full read can still retire stale tokens.
         """
         if source != "optimistic" and self._is_settling(href):
-            self.log.debug("dropping %s update for %s (settling)", source, href)
-            return False
+            self.log.debug("settling %s update for %s (holding written values)", source, href)
+            holding = True
+        else:
+            holding = False
         with self._cache_lock:
-            merged = dict(rep) if _is_alarms_href(href) else {**(self.cache.get(href) or {}), **rep}
+            if _is_alarms_href(href):
+                merged = dict(rep)
+            elif source in ("observe", "optimistic"):
+                merged = merge_partial_rep(self.cache.get(href) or {}, rep)
+            else:
+                merged = {**(self.cache.get(href) or {}), **rep}
+            if holding:
+                merged = self._hold_written(href, merged)
             changed = self.cache.apply_rep(href, merged, source=source)
         # Outside the cache lock -- the hook takes locks of its own and
         # never reads the cache back. `source` is passed along rather than

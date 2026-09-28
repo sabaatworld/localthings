@@ -116,6 +116,40 @@ async def test_options_write_optimistic_cache_keeps_sibling_tokens(coordinator) 
     ]
 
 
+async def test_options_write_posts_minimal_body_but_caches_merged(coordinator) -> None:
+    """End-to-end pin for the centralized optimistic merge: the PUT carries
+    only the changed token while the cache keeps every sibling (the washer
+    panel-notify shape, driven through async_send_command)."""
+    href = "/course/vs/0"
+    coordinator._observe.apply(
+        href,
+        {
+            "x.com.samsung.da.options": [
+                "Course_01",
+                "ExtraRinse_On",
+                "DetergentLevelCtrl_3",
+                "SoftenerLevelCtrl_0",
+            ],
+        },
+        source="poll",
+    )
+
+    desc = laundry.cycle_select(translation_key="dryer_cycle", icon="x")
+    bound = BoundEntity(href=href, capability=Capability(), desc=desc)
+
+    await coordinator.async_send_command(bound, "1D")
+
+    posted_path, posted_body = coordinator._session.post_calls[0]
+    assert posted_path == ["course", "vs", "0"]
+    assert posted_body == {"x.com.samsung.da.options": ["Course_1D"]}
+    assert coordinator._cache.get(href)["x.com.samsung.da.options"] == [
+        "Course_1D",
+        "ExtraRinse_On",
+        "DetergentLevelCtrl_3",
+        "SoftenerLevelCtrl_0",
+    ]
+
+
 # ---------------------------------------------------------------------------
 # Subdevice write translation (issue #177): a composite-entity write_fn (here
 # airconditioner._climate_write) returns *canonical* path_segs

@@ -175,22 +175,11 @@ def merge_options_field(cached, new_tokens):
 
     Confirmed on hardware (issue #54) that a write only needs to carry the
     changed token(s), not the whole array -- see laundry.option_write /
-    oven._option_write for the write side. coordinator.async_send_command
-    uses this read-side counterpart to keep the optimistic cache entry
-    complete during the write-settle window."""
-    merged = list(cached or [])
-    for token in new_tokens or ():
-        if not isinstance(token, str) or "_" not in token:
-            continue
-        prefix = token.split("_", 1)[0]
-        replaced = False
-        for i, o in enumerate(merged):
-            if isinstance(o, str) and o.startswith(prefix + "_"):
-                merged[i] = token
-                replaced = True
-        if not replaced:
-            merged.append(token)
-    return merged
+    oven._option_write for the write side. Implemented in
+    registry.partial_merge; kept here for backwards compatibility."""
+    from ..partial_merge import merge_options_tokens
+
+    return merge_options_tokens(cached, new_tokens)
 
 
 def merge_items_field(cached, new_items):
@@ -203,19 +192,12 @@ def merge_items_field(cached, new_items):
     airconditioner._climate_write's vendor temperature write). Fields
     within the matched item are merged, not replaced outright, so a
     setpoint-only write doesn't wipe current/minimum/maximum/unit from the
-    optimistic cache entry. An id with no match in `cached` is appended."""
-    merged = [dict(i) if isinstance(i, dict) else i for i in (cached or [])]
-    for new_item in new_items or ():
-        if not isinstance(new_item, dict):
-            continue
-        item_id = new_item.get("x.com.samsung.da.id")
-        for i, existing in enumerate(merged):
-            if isinstance(existing, dict) and existing.get("x.com.samsung.da.id") == item_id:
-                merged[i] = {**existing, **new_item}
-                break
-        else:
-            merged.append(new_item)
-    return merged
+    optimistic cache entry. An id with no match in `cached` is appended.
+    Implemented in registry.partial_merge; kept here for backwards
+    compatibility."""
+    from ..partial_merge import merge_items_entries
+
+    return merge_items_entries(cached, new_items)
 
 
 # /wm/setinfo/vs/0 -- laundry-family firmware capability flags. Present on
