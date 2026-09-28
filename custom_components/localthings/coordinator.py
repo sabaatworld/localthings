@@ -67,8 +67,6 @@ from .registry.batch import parse_device0_batch
 from .registry.by_type import resolve as resolve_registry
 from .registry.capabilities import cook
 from .registry.capabilities.common import (
-    merge_items_field,
-    merge_options_field,
     remote_control_enabled,
     remote_control_required_for_write,
 )
@@ -2439,34 +2437,24 @@ class LocalThingsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         # for the same reason, plus races on overlapping writes to the same
         # href.
         #
-        # write_fn bodies touching options/items now carry only the changed
-        # token(s) (issue #54), not the whole array -- but apply()'s
-        # field-level merge doesn't know that and would wipe every sibling
-        # option/item for the settle window. Pre-merge here the way the
-        # device does, so the optimistic cache entry stays complete; the
-        # wire `body` stays minimal.
+        # write_fn bodies touching options/items carry only the changed
+        # token(s) (issue #54), not the whole array -- the wire `body`
+        # stays minimal while apply()'s optimistic merge keeps the cached
+        # entry complete for the settle window. `before` (the pre-write rep)
+        # lets the settle guard hold only the written values against a stale
+        # echo instead of dropping every update to the href.
         write_only = getattr(desc, "write_only", False)
         if not write_only:
-            optimistic_body = body
-            new_options = body.get("x.com.samsung.da.options")
-            if isinstance(new_options, list):
-                cached_options = (self._cache.get(write_href) or {}).get("x.com.samsung.da.options")
-                optimistic_body = {
-                    **optimistic_body,
-                    "x.com.samsung.da.options": merge_options_field(cached_options, new_options),
-                }
-            # Same fact, items[] shape (see airconditioner._climate_write's
-            # vendor temperature write).
-            new_items = body.get("x.com.samsung.da.items")
-            if isinstance(new_items, list):
-                cached_items = (self._cache.get(write_href) or {}).get("x.com.samsung.da.items")
-                optimistic_body = {
-                    **optimistic_body,
-                    "x.com.samsung.da.items": merge_items_field(cached_items, new_items),
-                }
-            self._observe.apply(write_href, optimistic_body, source="optimistic")
+            # Shallow copy: StateCache replaces reps rather than mutating them
+            # in place, so this snapshot stays the pre-write state for the
+            # whole settle window.
+            before = dict(self._cache.get(write_href) or {})
+            self._observe.apply(write_href, body, source="optimistic")
             self._observe.mark_write_pending(
-                write_href, settle_s=self._POST_TIMEOUT_S + self._POLL_TIMEOUT_S
+                write_href,
+                settle_s=self._POST_TIMEOUT_S + self._POLL_TIMEOUT_S,
+                body=body,
+                before=before,
             )
 
         def _rearm() -> None:
@@ -2474,10 +2462,14 @@ class LocalThingsCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             # into the settle window armed above, leaving too little of it
             # for the confirming poll below and reviving the
             # revert-then-reapply symptom settle_s exists to prevent (issue
-            # #9). Re-arm it fresh now that the write actually landed.
+            # #9). Re-arm it fresh now that the write actually landed, with
+            # the same write context so the guard holds the written values.
             if not write_only:
                 self._observe.mark_write_pending(
-                    write_href, settle_s=self._POST_TIMEOUT_S + self._POLL_TIMEOUT_S
+                    write_href,
+                    settle_s=self._POST_TIMEOUT_S + self._POLL_TIMEOUT_S,
+                    body=body,
+                    before=before,
                 )
 
         await self._async_put(path_segs, body, write_href, on_retry=_rearm)
