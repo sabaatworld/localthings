@@ -130,6 +130,9 @@
       "cooktop_burner": {
         "name": "Burner {number}"
       },
+      "wrinkle_prevent_active": {
+        "name": "Wrinkle prevent active"
+      },
       "beep": {
         "name": "Beep"
       },
@@ -484,7 +487,14 @@
           "3a": "Hygiene Care",
           "3b": "Bedding/Dust Off",
           "3c": "Activewear",
-          "3d": "Denim"
+          "3d": "Denim",
+          "33": "Steam Sanitize+",
+          "32": "Perm Press",
+          "35": "Wrinkle Away",
+          "34": "Steam Refresh",
+          "30": "Activewear",
+          "3e": "Small Load",
+          "2f": "Heavy Duty"
         }
       },
       "dryer_dry_level": {
@@ -715,17 +725,6 @@
           "03": "High"
         }
       },
-      "soil_level": {
-        "name": "Soil level",
-        "state": {
-          "none": "None",
-          "extra_light": "Extra light",
-          "light": "Light",
-          "normal": "Normal",
-          "heavy": "Heavy",
-          "extra_heavy": "Extra heavy"
-        }
-      },
       "sound_mode": {
         "name": "Sound mode",
         "state": {
@@ -877,15 +876,27 @@
           "38": "Cotton Dry",
           "39": "Synthetics Dry",
           "3a": "Drum Clean",
+          "51": "Super Speed",
           "52": "Eco Cold",
           "53": "Heavy Duty",
           "54": "Towels",
           "55": "Activewear",
-          "57": "Delicate",
-          "5e": "Rinse+Spin",
+          "56": "Bedding",
+          "57": "Delicates",
+          "58": "Wool",
+          "5a": "Steam Sanitize",
+          "5b": "Small Load",
+          "5c": "Outdoor",
+          "5d": "Power Rinse",
+          "5e": "Rinse + Spin",
+          "5f": "Spin Only",
           "60": "Self Clean+",
+          "63": "Power Steam",
+          "64": "Steam Whites",
           "65": "Colors",
           "66": "Denim",
+          "67": "Steam Allergen",
+          "68": "Steam Bulky",
           "69": "AI Wash",
           "6a": "Wool",
           "6b": "Denim",
@@ -907,9 +918,11 @@
           "7d": "Bedding/Waterproof",
           "7e": "Self-Clean",
           "7f": "Wool/Delicate",
+          "85": "Steam Normal",
           "86": "Deep Wash",
           "87": "Download",
           "88": "Pet Care",
+          "8c": "AI OptiWash",
           "8f": "Intense Cold",
           "96": "Less Microfiber",
           "a0": "15' Quick Wash",
@@ -1023,6 +1036,24 @@
           "right_wide": "Right wide",
           "left_narrow": "Left narrow",
           "left_wide": "Left wide"
+        }
+      },
+      "extra_rinse": {
+        "name": "Extra rinse",
+        "state": {
+          "on": "On",
+          "off": "Off"
+        }
+      },
+      "soil_level": {
+        "name": "Soil level",
+        "state": {
+          "none": "None",
+          "extra_light": "Extra light",
+          "light": "Light",
+          "normal": "Normal",
+          "heavy": "Heavy",
+          "extra_heavy": "Extra heavy"
         }
       }
     },
@@ -1601,6 +1632,9 @@
       "cooktop_child_lock": {
         "name": "Child lock"
       },
+      "damp_alert": {
+        "name": "Damp Alert"
+      },
       "defrost_delay": {
         "name": "Defrost delay"
       },
@@ -2069,6 +2103,9 @@
     },
     "cook_duration_out_of_range": {
       "message": "{mode} takes a cook time from {min} to {max}."
+    },
+    "extra_rinse_unavailable_for_cycle": {
+      "message": "Extra Rinse isn't available on the selected cycle."
     }
   }
 }

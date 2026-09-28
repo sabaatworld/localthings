@@ -396,6 +396,18 @@ def _course_records(course_rep, must_cover=None):
     return fallback or {}
 
 
+def course_record_order(course_rep, resources):
+    """Course codes in supportedOptions record order.
+
+    Availability bitmaps such as ExtraRinseSet are positional with these
+    records, not with editCourseList.
+    """
+    edit_list = parse_edit_course_list(
+        (resources.get("/wm/editcourse/vs/0") or {}).get("x.com.samsung.da.editCourseList")
+    )
+    return list(_course_records(course_rep, must_cover=set(edit_list)))
+
+
 def course_option_mask(resources, kind, course=None):
     """(default index, allowed indices) for `kind` on the selected course.
 

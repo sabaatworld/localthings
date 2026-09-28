@@ -130,6 +130,9 @@
       "cooktop_burner": {
         "name": "Brenner {number}"
       },
+      "wrinkle_prevent_active": {
+        "name": "Knitterschutz aktiv"
+      },
       "beep": {
         "name": "Signalton"
       },
@@ -484,7 +487,14 @@
           "3a": "Hygienepflege",
           "3b": "Bettwäsche/Entstauben",
           "3c": "Sportkleidung",
-          "3d": "Jeansstoff"
+          "3d": "Jeansstoff",
+          "33": "Dampf-Hygiene+",
+          "32": "Pflegeleicht",
+          "35": "Entknittern",
+          "34": "Dampf-Auffrischung",
+          "30": "Sportkleidung",
+          "3e": "Kleine Beladung",
+          "2f": "Intensiv"
         }
       },
       "dryer_dry_level": {
@@ -681,17 +691,6 @@
           "03": "Hoch"
         }
       },
-      "soil_level": {
-        "name": "Verschmutzungsgrad",
-        "state": {
-          "none": "Keine",
-          "extra_light": "Extra leicht",
-          "light": "Leicht",
-          "normal": "Normal",
-          "heavy": "Stark",
-          "extra_heavy": "Extra stark"
-        }
-      },
       "sound_mode": {
         "name": "Tonmodus",
         "state": {
@@ -840,15 +839,27 @@
           "38": "Trocknen Baumwolle",
           "39": "Trocknen Pflegeleicht",
           "3a": "Trommelreinigung",
+          "51": "Super Speed",
           "52": "Eco Kalt",
           "53": "Intensiv",
           "54": "Handtücher",
           "55": "Sportkleidung",
+          "56": "Bettwäsche",
           "57": "Feinwäsche",
+          "58": "Wolle",
+          "5a": "Dampf-Hygiene",
+          "5b": "Kleine Beladung",
+          "5c": "Outdoor",
+          "5d": "Power-Spülen",
           "5e": "Spülen + Schleudern",
+          "5f": "Nur Schleudern",
           "60": "Selbstreinigung+",
+          "63": "Power-Dampf",
+          "64": "Dampf-Weißwäsche",
           "65": "Buntwäsche",
           "66": "Jeansstoff",
+          "67": "Dampf-Anti-Allergie",
+          "68": "Dampf-Großwäsche",
           "69": "KI-Wäsche",
           "6a": "Wolle",
           "6b": "Jeansstoff",
@@ -870,9 +881,11 @@
           "7d": "Bettwäsche/Wasserdicht",
           "7e": "Selbstreinigung",
           "7f": "Wolle/Feinwäsche",
+          "85": "Dampf-Normal",
           "86": "Tiefenreinigung",
           "87": "Download",
           "88": "Tierpflege",
+          "8c": "KI-OptiWash",
           "8f": "Kaltwäsche Intensiv",
           "96": "Weniger Mikrofasern",
           "a0": "Schnelle Wäsche 15'",
@@ -1023,6 +1036,24 @@
           "right_wide": "Rechts weit",
           "left_narrow": "Links eng",
           "left_wide": "Links weit"
+        }
+      },
+      "extra_rinse": {
+        "name": "Extra-Spülen",
+        "state": {
+          "on": "Ein",
+          "off": "Aus"
+        }
+      },
+      "soil_level": {
+        "name": "Verschmutzungsgrad",
+        "state": {
+          "none": "Keine",
+          "extra_light": "Extra leicht",
+          "light": "Leicht",
+          "normal": "Normal",
+          "heavy": "Stark",
+          "extra_heavy": "Extra stark"
         }
       }
     },
@@ -1595,6 +1626,9 @@
       "cooktop_child_lock": {
         "name": "Kindersicherung"
       },
+      "damp_alert": {
+        "name": "Signal Mischbeladung"
+      },
       "defrost_delay": {
         "name": "Abtauverzögerung"
       },
@@ -2069,6 +2103,9 @@
     },
     "cook_duration_out_of_range": {
       "message": "{mode} erlaubt eine Garzeit von {min} bis {max}."
+    },
+    "extra_rinse_unavailable_for_cycle": {
+      "message": "Extra Rinse ist bei dem ausgewählten Programm nicht verfügbar."
     }
   }
 }
