@@ -20,6 +20,13 @@ def _state(resources):
     return flatten(bound, resources)
 
 
+def test_unique_preserves_first_capability_instance_order():
+    first = object()
+    second = object()
+
+    assert cooktop._unique([first, second, first]) == [first, second]
+
+
 def test_real_cooktop_fixture_has_expected_idle_state():
     state = _state(_load_device("cooktop"))
 

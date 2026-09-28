@@ -130,6 +130,9 @@
       "cooktop_burner": {
         "name": "Pole grzejne {number}"
       },
+      "wrinkle_prevent_active": {
+        "name": "Bez zagnieceń aktywne"
+      },
       "beep": {
         "name": "Sygnał dźwiękowy"
       },
@@ -484,7 +487,14 @@
           "3a": "Higiena",
           "3b": "Pościel/odkurzanie",
           "3c": "Odzież sportowa",
-          "3d": "Jeansy"
+          "3d": "Jeansy",
+          "33": "Dezynfekcja parą+",
+          "32": "Tkaniny niemnące",
+          "35": "Usuwanie zagnieceń",
+          "34": "Odświeżanie parą",
+          "30": "Odzież sportowa",
+          "3e": "Mały wsad",
+          "2f": "Intensywne"
         }
       },
       "dryer_dry_level": {
@@ -877,15 +887,27 @@
           "38": "Suszenie bawełny",
           "39": "Suszenie syntetyków",
           "3a": "Czyszczenie bębna",
+          "51": "Super szybki",
           "52": "Eko na zimno",
           "53": "Intensywne",
           "54": "Ręczniki",
           "55": "Odzież sportowa",
+          "56": "Pościel",
           "57": "Delikatne",
+          "58": "Wełna",
+          "5a": "Dezynfekcja parą",
+          "5b": "Mały wsad",
+          "5c": "Odzież outdoorowa",
+          "5d": "Mocne płukanie",
           "5e": "Płukanie + wirowanie",
+          "5f": "Tylko wirowanie",
           "60": "Samoczyszczenie+",
+          "63": "Mocna para",
+          "64": "Białe z parą",
           "65": "Tkaniny kolorowe",
           "66": "Jeansy",
+          "67": "Antyalergiczny z parą",
+          "68": "Duże rzeczy z parą",
           "69": "Pranie optymalne",
           "6a": "Wełna",
           "6b": "Jeansy",
@@ -907,9 +929,11 @@
           "7d": "Pościel/tkaniny wodoodporne",
           "7e": "Samoczyszczenie",
           "7f": "Wełna/tkaniny delikatne",
+          "85": "Normalny z parą",
           "86": "Pranie dogłębne",
           "87": "Pobrany program",
           "88": "Dla zwierząt",
+          "8c": "AI OptiWash",
           "8f": "Intensywne pranie na zimno",
           "96": "Mniej włókien",
           "a0": "Szybkie pranie 15'",
@@ -1023,6 +1047,13 @@
           "right_wide": "W prawo, szeroko",
           "left_narrow": "W lewo, wąsko",
           "left_wide": "W lewo, szeroko"
+        }
+      },
+      "extra_rinse": {
+        "name": "Dodatkowe płukanie",
+        "state": {
+          "on": "Wł.",
+          "off": "Wył."
         }
       }
     },
@@ -1601,6 +1632,9 @@
       "cooktop_child_lock": {
         "name": "Blokada rodzicielska"
       },
+      "damp_alert": {
+        "name": "Alert wilgotnego wsadu"
+      },
       "defrost_delay": {
         "name": "Opóźnienie rozmrażania"
       },
@@ -2123,6 +2157,9 @@
     },
     "cook_duration_out_of_range": {
       "message": "Tryb {mode} przyjmuje czas gotowania od {min} do {max}."
+    },
+    "extra_rinse_unavailable_for_cycle": {
+      "message": "Dodatkowe płukanie nie jest dostępne dla wybranego cyklu."
     }
   }
 }

@@ -202,18 +202,13 @@ Dryer `translation_key` bake-in (found live 2026-09-25): the dryer
 dropdown showed raw codes for every option — including the 7 already
 catalogued — while the washer resolved. Root cause was not the labels
 but the key: the entity registry held `cycle` for `select.dryer_cycle`
-(the frontend renders option states under the registry's stored key),
-because the entity registered before the cold-tier poll delivered
-`/st/dryercourse/vs/0` (dryer setup: ~4s; washer: ~28s with retries —
-same race, opposite outcome). Restarts re-bake whatever resolves at
-registration, so no restart could heal it. Fix: `poll_tier="probe"` on
-`/st/washercourse/vs/0` + `/st/dryercourse/vs/0` in `ignored.py` — the
-first-discovery probe runs inside entry setup, so the table is present
-deterministically at registration and the next restart self-heals the
-registry entry (verified live: `dryer_cycle_table_03` after restart).
-Same trap exists for `/st/airdressercourse/vs/0` — left as a follow-up
-(washer/dryer scope). The table hrefs stay covered by IGNORED in every
-registry, so the probe-coverage test is unaffected.
+(the frontend renders option states under the registry's stored key).
+The table resources are already in the initial `/device/0` batch that
+discovery receives, so they remain cold `IGNORED` capabilities. Promoting
+them to `probe` would add direct reads for every appliance, even though the
+data is already available, and would violate the probe-tier invariant that
+probed hrefs are absent from device batches. Same trap exists for
+`/st/airdressercourse/vs/0` — left as a follow-up (washer/dryer scope).
 
 Out of scope: bubble-soak/pre-soak/intensive (already shipped,
 per-course gated, unavailable on this washer — not reworked here).
@@ -238,7 +233,8 @@ patterns aren't this PR's to change). Verified live after restart:
 - `custom_components/localthings/registry/capabilities/dryer.py`:
   verbatim fallback + warm tier on `DRYER_COURSE`.
 - `custom_components/localthings/registry/capabilities/ignored.py`:
-  probe tier on the two course-table hrefs (translation-key bake-in).
+  course-table hrefs remain cold because the initial device batch already
+  supplies their translation state.
 - `custom_components/localthings/registry/capabilities/laundry.py`:
   record-order helper beside `_course_records` for the ExtraRinse
   gate; verbatim label fallback used by the dryer (and washer) cycle
@@ -254,7 +250,7 @@ patterns aren't this PR's to change). Verified live after restart:
   `Table_03` states (`33/32/35/34/30/3e/2f`, physically confirmed).
   No `icons.json` change (`mdi:water-opacity` descriptor icon is the
   mechanism; `icons.json` carries no `select` section).
-- `translations/{cs,de,es,it,ko,nl,sk}.json`: best-effort drafts for
+- `translations/{cs,de,es,it,ko,nl,pl,sk}.json`: best-effort drafts for
   all of the above are prepared (each locale follows its own file's
   brand-term handling — e.g. `AI OptiWash` kept in English where the
   locale keeps `AI Wash`, localized where it translates it). Flagged
@@ -386,17 +382,15 @@ Ordered; each step lands tested before the next begins.
    comments follow CONTRIBUTING (why-only, 1–2 sentences, cite the
    issue/live observation once).
 2. `washer.py` — add `soil_level` `SelectDesc` to `WASHER_SETTINGS`
-   (field + `options_field`, `_wash_control_present`, direct write).
+   (field + course-narrowed options, `_wash_control_present`, direct write).
 3. `dryer.py` + `washer.py` — verbatim label fallback
    (`lambda value, resources: value`) on both cycle selects (fixes
    `3 E`/`2 F`; washer shares the path); warm tier on `DRYER_COURSE`
-   (push). `ignored.py` — probe tier on `/st/washercourse/vs/0` +
-   `/st/dryercourse/vs/0` (translation-key bake-in); verify the dryer
-   registry entry flips to `dryer_cycle_table_03` after restart.
+   (push). Keep the batch-provided course-table hrefs cold in `ignored.py`.
 4. `translations/en.json` — add `extra_rinse`, `soil_level`, the
    exception entry, 14 washer states + `57`/`5E` corrections, 7 dryer
    states (tables above).
-5. `translations/{cs,de,es,it,ko,nl,sk}.json` — apply the drafted
+5. `translations/{cs,de,es,it,ko,nl,pl,sk}.json` — apply the drafted
    values verbatim including the exception entry (tables above); new
    code keys lowercase. (The mirror-shape test enforces key-for-key
    parity — a missing exception entry fails CI.)
