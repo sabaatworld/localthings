@@ -568,6 +568,101 @@ class TestWashOptionToggleValidation:
         assert desc.validate_fn("On", rep, _EDIT_COURSE_RESOURCES) is None
 
 
+# Live tokens from a WW90-class washer (Table_02, 2026-09-25): 21 courses
+# in editCourseList, 25 records in supportedOptions (which ExtraRinseSet
+# is positional with — not the edit list). Bytes 14/22/24 read '00' on
+# courses 58 (Wool), 5F (Spin Only) and 60 (Self Clean+).
+_LIVE_EDIT_COURSE_RESOURCES = {
+    "/wm/editcourse/vs/0": {
+        "x.com.samsung.da.editCourseList": "EditCourseList_01515B5756608C53645A85545C55586867635D5F5E",  # noqa: E501
+    },
+}
+_LIVE_EXTRA_RINSE_SET = "ExtraRinseSet_F0F0F0F0F0F0F0F0F0F0F0F0F0F000F0F0F0F0F0F0F000F000"
+_LIVE_SUPPORTED_OPTIONS = "301833EA57BC33E8C831EA57FC30853843EA67FC53E518318A57FC33E5B831EA67FC13E57810EA41FC33E648410A57FC33E5A8520A57FC33E858410A57FC33E54831EA57FC33E56830EA31FC33E5C830EA41FC33E55830EA30FC33E66830EA41FC33E58830EA30FC308658204A57FC33E59830EA33FC33E528106A57FC33E688308A31FC33E678410A57FC33E638410A67FC53E5D831EA57FC33E5F8000A57EC0005E8000A57FC000608520A640C308"  # noqa: E501
+
+
+def _live_course_rep(course, extra="ExtraRinse_Off"):
+    return {
+        "x.com.samsung.da.options": [f"Course_{course}", extra, _LIVE_EXTRA_RINSE_SET],
+        "x.com.samsung.da.supportedOptions": [_LIVE_SUPPORTED_OPTIONS],
+    }
+
+
+class TestExtraRinse:
+    """Extra Rinse select over /course/vs/0's options[] array."""
+
+    @staticmethod
+    def _desc():
+        return next(e for e in washer.WASHER_COURSE.entities if e.key == "extra_rinse")
+
+    def test_exists_only_when_token_present(self):
+        assert self._desc().exists_fn({"x.com.samsung.da.options": []}, {}) is False
+        rep = {"x.com.samsung.da.options": ["ExtraRinse_Off"]}
+        assert self._desc().exists_fn(rep, {}) is True
+
+    def test_reads_on_and_off(self):
+        assert self._desc().rep_fn({"x.com.samsung.da.options": ["ExtraRinse_On"]}) == "On"
+        assert self._desc().rep_fn({"x.com.samsung.da.options": ["ExtraRinse_Off"]}) == "Off"
+
+    def test_write_carries_only_the_changed_token(self):
+        rep = {"x.com.samsung.da.options": ["ExtraRinse_Off", "GMT_F2"]}
+        path, body = self._desc().write_fn("On", rep)
+        assert path == ["course", "vs", "0"]
+        assert body == {"x.com.samsung.da.options": ["ExtraRinse_On"]}
+
+        rep = {"x.com.samsung.da.options": ["ExtraRinse_On"]}
+        path, body = self._desc().write_fn("Off", rep)
+        assert body == {"x.com.samsung.da.options": ["ExtraRinse_Off"]}
+
+    def test_write_rejects_non_on_off_payload(self):
+        rep = {"x.com.samsung.da.options": ["ExtraRinse_Off"]}
+        assert self._desc().write_fn("bogus", rep) is None
+
+    def test_allowed_on_a_supported_course(self):
+        rep = _live_course_rep("01")
+        assert self._desc().validate_fn("On", rep, _LIVE_EDIT_COURSE_RESOURCES) is None
+
+    def test_rejected_on_courses_without_a_rinse_phase(self):
+        for course in ("58", "5F", "60"):
+            rep = _live_course_rep(course)
+            translation_key = self._desc().validate_fn("On", rep, _LIVE_EDIT_COURSE_RESOURCES)
+            assert translation_key == "extra_rinse_unavailable_for_cycle"
+
+    def test_turning_off_is_never_blocked(self):
+        rep = _live_course_rep("58")
+        assert self._desc().validate_fn("Off", rep, _LIVE_EDIT_COURSE_RESOURCES) is None
+
+    def test_allows_write_when_availability_unresolvable(self):
+        desc = self._desc()
+        rep = _live_course_rep("01")
+        assert desc.validate_fn("On", rep, {}) is None
+
+        rep = {"x.com.samsung.da.options": ["Course_01"]}
+        assert desc.validate_fn("On", rep, _LIVE_EDIT_COURSE_RESOURCES) is None
+
+
+class TestSoilLevel:
+    """Soil level select on /washer/vs/0 -- the same field plus live
+    supported-list shape as the neighboring rinse_cycles select."""
+
+    @staticmethod
+    def _desc():
+        return next(e for e in washer.WASHER_SETTINGS.entities if e.key == "soil_level")
+
+    def test_exists_on_value_or_supported_list(self):
+        assert self._desc().exists_fn({"x.com.samsung.da.soilLevel": "Normal"}, {}) is True
+        rep = {"x.com.samsung.da.supportedSoilLevel": ["None", "Normal"]}
+        assert self._desc().exists_fn(rep, {}) is True
+
+    def test_phantom_suppressed_without_either(self):
+        assert self._desc().exists_fn({}, {}) is False
+
+    def test_write_posts_the_raw_value(self):
+        path, body = self._desc().write_fn("Heavy", {})
+        assert path == ["washer", "vs", "0"]
+        assert body == {"x.com.samsung.da.soilLevel": "Heavy"}
+
+
 class TestAiEnergyLevel:
     """Issue #40 -- /energy/ailevel/vs/0 was unbound on a plain washer.
 

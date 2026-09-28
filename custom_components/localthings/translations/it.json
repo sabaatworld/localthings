@@ -130,6 +130,9 @@
       "cooktop_burner": {
         "name": "Bruciatore {number}"
       },
+      "wrinkle_prevent_active": {
+        "name": "Antipiega attivo"
+      },
       "beep": {
         "name": "Segnale acustico"
       },
@@ -484,7 +487,14 @@
           "3a": "Cura igienica",
           "3b": "Biancheria da letto/Antipolvere",
           "3c": "Abbigliamento sportivo",
-          "3d": "Jeans"
+          "3d": "Jeans",
+          "33": "Igienizzante a vapore+",
+          "32": "Pronto da stirare",
+          "35": "Antipiega",
+          "34": "Rinfresca a vapore",
+          "30": "Abbigliamento sportivo",
+          "3e": "Piccolo carico",
+          "2f": "Intenso"
         }
       },
       "dryer_dry_level": {
@@ -715,17 +725,6 @@
           "03": "Alta"
         }
       },
-      "soil_level": {
-        "name": "Livello di sporco",
-        "state": {
-          "none": "Nessuno",
-          "extra_light": "Extra leggero",
-          "light": "Leggero",
-          "normal": "Normale",
-          "heavy": "Molto sporco",
-          "extra_heavy": "Extra sporco"
-        }
-      },
       "sound_mode": {
         "name": "Modalità audio",
         "state": {
@@ -877,15 +876,27 @@
           "38": "Asciugatura cotone",
           "39": "Asciugatura sintetici",
           "3a": "Pulizia cestello",
+          "51": "Super Speed",
           "52": "Eco freddo",
           "53": "Intenso",
           "54": "Asciugamani",
           "55": "Capi sportivi",
-          "57": "Delicato",
+          "56": "Biancheria da letto",
+          "57": "Delicati",
+          "58": "Lana",
+          "5a": "Igienizzante a vapore",
+          "5b": "Carico ridotto",
+          "5c": "Capi outdoor",
+          "5d": "Risciacquo potente",
           "5e": "Risciacquo+Centrifuga",
+          "5f": "Solo centrifuga",
           "60": "Self Clean+",
+          "63": "Vapore potente",
+          "64": "Bianchi a vapore",
           "65": "Colorati",
           "66": "Jeans",
+          "67": "Antiallergia a vapore",
+          "68": "Voluminosi a vapore",
           "69": "Lavaggio AI",
           "6a": "Lana",
           "6b": "Jeans",
@@ -907,9 +918,11 @@
           "7d": "Biancheria da letto/Impermeabile",
           "7e": "Pulizia cestello",
           "7f": "Lana/Delicati",
+          "85": "Normale a vapore",
           "86": "Lavaggio profondo",
           "87": "Scaricato",
           "88": "Cura animali",
+          "8c": "Lavaggio AI OptiWash",
           "8f": "Intenso a freddo",
           "96": "Riduci microfibre",
           "a0": "Rapido 15'",
@@ -1023,6 +1036,24 @@
           "right_wide": "Destra ampia",
           "left_narrow": "Sinistra stretta",
           "left_wide": "Sinistra ampia"
+        }
+      },
+      "extra_rinse": {
+        "name": "Risciacquo extra",
+        "state": {
+          "on": "Acceso",
+          "off": "Spento"
+        }
+      },
+      "soil_level": {
+        "name": "Livello di sporco",
+        "state": {
+          "none": "Nessuna",
+          "extra_light": "Extra leggero",
+          "light": "Leggero",
+          "normal": "Normale",
+          "heavy": "Intenso",
+          "extra_heavy": "Extra intenso"
         }
       }
     },
@@ -1601,6 +1632,9 @@
       "cooktop_child_lock": {
         "name": "Blocco Bambini"
       },
+      "damp_alert": {
+        "name": "Avviso di umidità"
+      },
       "defrost_delay": {
         "name": "Ritardo sbrinamento"
       },
@@ -2123,6 +2157,9 @@
     },
     "cook_duration_out_of_range": {
       "message": "{mode} accetta un tempo di cottura da {min} a {max}."
+    },
+    "extra_rinse_unavailable_for_cycle": {
+      "message": "Risciacquo extra non è disponibile per il ciclo selezionato."
     }
   }
 }

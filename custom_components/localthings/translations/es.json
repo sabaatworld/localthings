@@ -335,6 +335,9 @@
     },
     "cook_duration_out_of_range": {
       "message": "{mode} admite un tiempo de cocción de {min} a {max}."
+    },
+    "extra_rinse_unavailable_for_cycle": {
+      "message": "El aclarado extra no está disponible en el ciclo seleccionado."
     }
   },
   "entity": {
@@ -467,6 +470,9 @@
       },
       "cooktop_burner": {
         "name": "Quemador {number}"
+      },
+      "wrinkle_prevent_active": {
+        "name": "Anti-arrugas activo"
       },
       "beep": {
         "name": "Pitido"
@@ -822,7 +828,14 @@
           "3a": "Cuidado higiénico",
           "3b": "Ropa de cama/Antipolvo",
           "3c": "Ropa deportiva",
-          "3d": "Denim"
+          "3d": "Denim",
+          "33": "Desinfección por vapor+",
+          "32": "Planchado fácil",
+          "35": "Anti-arrugas",
+          "34": "Renovación por vapor",
+          "30": "Ropa deportiva",
+          "3e": "Carga pequeña",
+          "2f": "Servicio intensivo"
         }
       },
       "dryer_dry_level": {
@@ -1053,17 +1066,6 @@
           "03": "Alta"
         }
       },
-      "soil_level": {
-        "name": "Nivel de suciedad",
-        "state": {
-          "none": "Ninguno",
-          "extra_light": "Extra ligero",
-          "light": "Ligero",
-          "normal": "Normal",
-          "heavy": "Intenso",
-          "extra_heavy": "Extra intenso"
-        }
-      },
       "sound_mode": {
         "name": "Modo de sonido",
         "state": {
@@ -1215,15 +1217,27 @@
           "38": "Secado de algodón",
           "39": "Secado de sintéticos",
           "3a": "Limpieza de Tambor",
+          "51": "Súper velocidad",
           "52": "Eco frío",
           "53": "Servicio intensivo",
           "54": "Toallas",
           "55": "Ropa deportiva",
-          "57": "Delicado",
+          "56": "Ropa de cama",
+          "57": "Delicados",
+          "58": "Lana",
+          "5a": "Desinfección con vapor",
+          "5b": "Carga pequeña",
+          "5c": "Exterior",
+          "5d": "Aclarado potente",
           "5e": "Aclarar + Centrifugar",
+          "5f": "Solo centrifugar",
           "60": "Autolimpieza+",
+          "63": "Vapor potente",
+          "64": "Blancos con vapor",
           "65": "Color",
           "66": "Denim",
+          "67": "Antialérgico con vapor",
+          "68": "Voluminoso con vapor",
           "69": "Lavado IA",
           "6a": "Lana",
           "6b": "Denim",
@@ -1245,9 +1259,11 @@
           "7d": "Ropa de cama / Impermeable",
           "7e": "Autolimpieza",
           "7f": "Lana / Delicados",
+          "85": "Normal con vapor",
           "86": "Lavado profundo",
           "87": "Descarga de Programas",
           "88": "Cuidado de mascotas",
+          "8c": "Lavado IA OptiWash",
           "8f": "Lavado en frío",
           "96": "Menos microfibras",
           "a0": "Lavado rápido 15'",
@@ -1361,6 +1377,24 @@
           "right_wide": "Derecha amplia",
           "left_narrow": "Izquierda estrecha",
           "left_wide": "Izquierda amplia"
+        }
+      },
+      "extra_rinse": {
+        "name": "Aclarado extra",
+        "state": {
+          "on": "Encendido",
+          "off": "Apagado"
+        }
+      },
+      "soil_level": {
+        "name": "Nivel de suciedad",
+        "state": {
+          "none": "Ninguna",
+          "extra_light": "Extra leve",
+          "light": "Leve",
+          "normal": "Normal",
+          "heavy": "Intenso",
+          "extra_heavy": "Extra intenso"
         }
       }
     },
@@ -1938,6 +1972,9 @@
       },
       "cooktop_child_lock": {
         "name": "Bloqueo infantil"
+      },
+      "damp_alert": {
+        "name": "Alerta de humedad"
       },
       "defrost_delay": {
         "name": "Retardo de descongelación"

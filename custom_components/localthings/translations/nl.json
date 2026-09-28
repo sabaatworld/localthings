@@ -130,6 +130,9 @@
       "cooktop_burner": {
         "name": "Brander {number}"
       },
+      "wrinkle_prevent_active": {
+        "name": "Kreukpreventie actief"
+      },
       "beep": {
         "name": "Piep"
       },
@@ -484,7 +487,14 @@
           "3a": "Hygiënisch drogen",
           "3b": "Beddengoed/Stof verwijderen",
           "3c": "Sportkleding",
-          "3d": "Spijkergoed"
+          "3d": "Spijkergoed",
+          "33": "Stoomhygiëne+",
+          "32": "Strijkvrij",
+          "35": "Kreukpreventie",
+          "34": "Stoom opfrissen",
+          "30": "Sportkleding",
+          "3e": "Kleine was",
+          "2f": "Intensief"
         }
       },
       "dryer_dry_level": {
@@ -715,17 +725,6 @@
           "03": "Hoog"
         }
       },
-      "soil_level": {
-        "name": "Vuilgraad",
-        "state": {
-          "none": "Geen",
-          "extra_light": "Extra licht",
-          "light": "Licht",
-          "normal": "Normaal",
-          "heavy": "Zwaar",
-          "extra_heavy": "Extra zwaar"
-        }
-      },
       "sound_mode": {
         "name": "Geluidsmodus",
         "state": {
@@ -877,15 +876,27 @@
           "38": "Katoen drogen",
           "39": "Synthetisch drogen",
           "3a": "Trommel reinigen",
+          "51": "Super Speed",
           "52": "Eco koud",
           "53": "Intensief",
           "54": "Handdoeken",
           "55": "Sportkleding",
+          "56": "Beddengoed",
           "57": "Fijne was",
+          "58": "Wol",
+          "5a": "Stoomhygiëne",
+          "5b": "Kleine was",
+          "5c": "Outdoor",
+          "5d": "Power spoelen",
           "5e": "Spoelen+centrifugeren",
+          "5f": "Alleen centrifugeren",
           "60": "Self Clean+",
+          "63": "Power Steam",
+          "64": "Stoom witte was",
           "65": "Bonte was",
           "66": "Spijkergoed",
+          "67": "Stoom anti-allergie",
+          "68": "Stoom volumineuze was",
           "69": "AI wassen",
           "6a": "Wol",
           "6b": "Spijkergoed",
@@ -907,9 +918,11 @@
           "7d": "Beddengoed/waterdicht",
           "7e": "Self Clean",
           "7f": "Wol/fijne was",
+          "85": "Stoom normaal",
           "86": "Diep wassen",
           "87": "Gedownload",
           "88": "Huisdierverzorging",
+          "8c": "AI OptiWash",
           "8f": "Intensief koud",
           "96": "Minder microvezels",
           "a0": "15' Snelle was",
@@ -1023,6 +1036,24 @@
           "right_wide": "Rechts breed",
           "left_narrow": "Links smal",
           "left_wide": "Links breed"
+        }
+      },
+      "extra_rinse": {
+        "name": "Extra spoelen",
+        "state": {
+          "on": "Aan",
+          "off": "Uit"
+        }
+      },
+      "soil_level": {
+        "name": "Vervuilingsgraad",
+        "state": {
+          "none": "Geen",
+          "extra_light": "Extra licht",
+          "light": "Licht",
+          "normal": "Normaal",
+          "heavy": "Erg vervuild",
+          "extra_heavy": "Extra erg vervuild"
         }
       }
     },
@@ -1601,6 +1632,9 @@
       "cooktop_child_lock": {
         "name": "Kinderslot"
       },
+      "damp_alert": {
+        "name": "Waarschuwing vochtige was"
+      },
       "defrost_delay": {
         "name": "Ontdooien uitstellen"
       },
@@ -2123,6 +2157,9 @@
     },
     "cook_duration_out_of_range": {
       "message": "{mode} accepteert een bereidingstijd van {min} tot {max}."
+    },
+    "extra_rinse_unavailable_for_cycle": {
+      "message": "Extra Rinse is niet beschikbaar voor het geselecteerde programma."
     }
   }
 }

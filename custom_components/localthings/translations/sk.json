@@ -130,6 +130,9 @@
       "cooktop_burner": {
         "name": "Varná zóna {number}"
       },
+      "wrinkle_prevent_active": {
+        "name": "Ochrana proti pokrčeniu aktívna"
+      },
       "beep": {
         "name": "Pípanie"
       },
@@ -484,7 +487,14 @@
           "3a": "Hygienické sušenie",
           "3b": "Posteľná bielizeň/odstránenie prachu",
           "3c": "Športové oblečenie",
-          "3d": "Džínsy"
+          "3d": "Džínsy",
+          "33": "Parná dezinfekcia+",
+          "32": "Nekrčivá bielizeň",
+          "35": "Proti pokrčeniu",
+          "34": "Parné osvieženie",
+          "30": "Športové oblečenie",
+          "3e": "Malá náplň",
+          "2f": "Intenzívny"
         }
       },
       "dryer_dry_level": {
@@ -715,17 +725,6 @@
           "03": "Vysoké"
         }
       },
-      "soil_level": {
-        "name": "Úroveň znečistenia",
-        "state": {
-          "none": "Žiadna",
-          "extra_light": "Extra ľahké",
-          "light": "Ľahké",
-          "normal": "Normálne",
-          "heavy": "Silné",
-          "extra_heavy": "Extra silné"
-        }
-      },
       "sound_mode": {
         "name": "Zvukový režim",
         "state": {
@@ -877,15 +876,27 @@
           "38": "Sušenie bavlny",
           "39": "Sušenie syntetiky",
           "3a": "Čistenie bubna",
+          "51": "Super Speed",
           "52": "Eko pranie v studenej vode",
           "53": "Intenzívny",
           "54": "Uteráky",
           "55": "Športové oblečenie",
-          "57": "Jemný",
+          "56": "Posteľná bielizeň",
+          "57": "Jemná bielizeň",
+          "58": "Vlna",
+          "5a": "Parná dezinfekcia",
+          "5b": "Malá náplň",
+          "5c": "Outdoor",
+          "5d": "Výkonné plákanie",
           "5e": "Plákanie + odstreďovanie",
+          "5f": "Iba odstreďovanie",
           "60": "Samočistenie+",
+          "63": "Výkonná para",
+          "64": "Parná biela bielizeň",
           "65": "Farebná bielizeň",
           "66": "Džínsy",
+          "67": "Parný antialergénny",
+          "68": "Parná objemná bielizeň",
           "69": "AI pranie",
           "6a": "Vlna",
           "6b": "Džínsy",
@@ -907,9 +918,11 @@
           "7d": "Posteľná bielizeň/nepremokavé oblečenie",
           "7e": "Samočistenie",
           "7f": "Vlna/jemná bielizeň",
+          "85": "Parný normálny",
           "86": "Hĺbkové pranie",
           "87": "Stiahnutý program",
           "88": "Starostlivosť o domáce zvieratá",
+          "8c": "AI OptiWash",
           "8f": "Intenzívne pranie v studenej vode",
           "96": "Menej mikrovlákien",
           "a0": "15-minútové rýchle pranie",
@@ -1023,6 +1036,24 @@
           "right_wide": "Vpravo široko",
           "left_narrow": "Vľavo úzko",
           "left_wide": "Vľavo široko"
+        }
+      },
+      "extra_rinse": {
+        "name": "Extra plákanie",
+        "state": {
+          "on": "Zapnuté",
+          "off": "Vypnuté"
+        }
+      },
+      "soil_level": {
+        "name": "Stupeň znečistenia",
+        "state": {
+          "none": "Žiadne",
+          "extra_light": "Extra ľahké",
+          "light": "Ľahké",
+          "normal": "Normálne",
+          "heavy": "Silné",
+          "extra_heavy": "Extra silné"
         }
       }
     },
@@ -1601,6 +1632,9 @@
       "cooktop_child_lock": {
         "name": "Detská poistka"
       },
+      "damp_alert": {
+        "name": "Upozornenie na vlhké prádlo"
+      },
       "defrost_delay": {
         "name": "Oneskorenie odmrazovania"
       },
@@ -2123,6 +2157,9 @@
     },
     "cook_duration_out_of_range": {
       "message": "Režim {mode} prijíma čas prípravy od {min} do {max}."
+    },
+    "extra_rinse_unavailable_for_cycle": {
+      "message": "Extra plákanie nie je pri vybranom cykle dostupné."
     }
   }
 }

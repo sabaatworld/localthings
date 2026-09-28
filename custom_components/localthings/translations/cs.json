@@ -130,6 +130,9 @@
       "cooktop_burner": {
         "name": "Hořák {number}"
       },
+      "wrinkle_prevent_active": {
+        "name": "Ochrana proti pomačkání aktivní"
+      },
       "beep": {
         "name": "Pípání"
       },
@@ -484,7 +487,14 @@
           "3a": "Hygienické sušení",
           "3b": "Ložní prádlo/Odstranění prachu",
           "3c": "Sportovní oblečení",
-          "3d": "Džíny"
+          "3d": "Džíny",
+          "33": "Parní dezinfekce+",
+          "32": "Nežehlivé prádlo",
+          "35": "Proti pomačkání",
+          "34": "Parní osvěžení",
+          "30": "Sportovní oblečení",
+          "3e": "Malá náplň",
+          "2f": "Intenzivní"
         }
       },
       "dryer_dry_level": {
@@ -715,17 +725,6 @@
           "03": "Vysoké"
         }
       },
-      "soil_level": {
-        "name": "Úroveň znečištění",
-        "state": {
-          "none": "Žádná",
-          "extra_light": "Extra lehké",
-          "light": "Lehké",
-          "normal": "Běžné",
-          "heavy": "Silné",
-          "extra_heavy": "Extra silné"
-        }
-      },
       "sound_mode": {
         "name": "Zvukový režim",
         "state": {
@@ -877,15 +876,27 @@
           "38": "Sušení bavlny",
           "39": "Sušení syntetiky",
           "3a": "Čištění bubnu",
+          "51": "Super rychlé",
           "52": "Eco studená",
           "53": "Intenzivní",
           "54": "Ručníky",
           "55": "Sportovní oblečení",
-          "57": "Jemné",
-          "5e": "Máchání+odstřeďování",
+          "56": "Ložní prádlo",
+          "57": "Jemné prádlo",
+          "58": "Vlna",
+          "5a": "Parní dezinfekce",
+          "5b": "Malá náplň",
+          "5c": "Outdoor",
+          "5d": "Výkonné máchání",
+          "5e": "Máchání + odstřeďování",
+          "5f": "Pouze odstřeďování",
           "60": "Samočištění+",
+          "63": "Výkonná pára",
+          "64": "Parní bílé prádlo",
           "65": "Barevné prádlo",
           "66": "Džíny",
+          "67": "Parní antialergenní",
+          "68": "Parní objemné prádlo",
           "69": "AI praní",
           "6a": "Vlna",
           "6b": "Džíny",
@@ -907,9 +918,11 @@
           "7d": "Ložní prádlo/nepromokavé",
           "7e": "Samočištění",
           "7f": "Vlna/jemné",
+          "85": "Parní normální",
           "86": "Hloubkové praní",
           "87": "Stažený program",
           "88": "Péče o domácí mazlíčky",
+          "8c": "AI OptiWash",
           "8f": "Intenzivní studená",
           "96": "Méně mikrovláken",
           "a0": "15min rychlé praní",
@@ -1023,6 +1036,24 @@
           "right_wide": "Vpravo široce",
           "left_narrow": "Vlevo úzce",
           "left_wide": "Vlevo široce"
+        }
+      },
+      "extra_rinse": {
+        "name": "Extra máchání",
+        "state": {
+          "on": "Zapnuto",
+          "off": "Vypnuto"
+        }
+      },
+      "soil_level": {
+        "name": "Stupeň znečištění",
+        "state": {
+          "none": "Žádné",
+          "extra_light": "Extra lehké",
+          "light": "Lehké",
+          "normal": "Normální",
+          "heavy": "Silné",
+          "extra_heavy": "Extra silné"
         }
       }
     },
@@ -1601,6 +1632,9 @@
       "cooktop_child_lock": {
         "name": "Dětský zámek"
       },
+      "damp_alert": {
+        "name": "Upozornění na vlhké prádlo"
+      },
       "defrost_delay": {
         "name": "Odložené odmrazování"
       },
@@ -2123,6 +2157,9 @@
     },
     "cook_duration_out_of_range": {
       "message": "Režim {mode} přijímá dobu přípravy od {min} do {max}."
+    },
+    "extra_rinse_unavailable_for_cycle": {
+      "message": "Extra máchání není u vybraného cyklu k dispozici."
     }
   }
 }

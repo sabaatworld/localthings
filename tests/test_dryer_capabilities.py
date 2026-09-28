@@ -48,6 +48,8 @@ def test_expected_entities_present():
         "remote_control",
         "dry_level",
         "wrinkle_prevent",
+        "damp_alert",
+        "wrinkle_prevent_active",
         "energy_kwh",
     ):
         assert key in state, key
@@ -157,6 +159,59 @@ def test_st_dryercourse_is_ignored():
     ignored_hrefs = {c.href for c in ignored.IGNORED}
     assert "/st/dryercourse/vs/0" in ignored_hrefs
     assert "/st/washercourse/vs/0" in ignored_hrefs
+
+
+class TestDampAlert:
+    """Damp Alert switch over /course/vs/0's options[] array."""
+
+    @staticmethod
+    def _desc():
+        return next(e for e in dryer.DRYER_COURSE.entities if e.key == "damp_alert")
+
+    def test_exists_only_when_token_present(self):
+        assert self._desc().exists_fn({"x.com.samsung.da.options": []}, {}) is False
+        rep = {"x.com.samsung.da.options": ["MixedLoadBell_Disable"]}
+        assert self._desc().exists_fn(rep, {}) is True
+
+    def test_reads_enable_and_disable(self):
+        rep = lambda token: {"x.com.samsung.da.options": [token]}  # noqa: E731
+        assert self._desc().rep_fn(rep("MixedLoadBell_Enable")) is True
+        assert self._desc().rep_fn(rep("MixedLoadBell_Disable")) is False
+
+    def test_write_maps_on_off_to_enable_disable(self):
+        rep = {"x.com.samsung.da.options": ["MixedLoadBell_Disable", "GMT_F2"]}
+        path, body = self._desc().write_fn("On", rep)
+        assert path == ["course", "vs", "0"]
+        assert body == {"x.com.samsung.da.options": ["MixedLoadBell_Enable"]}
+
+        rep = {"x.com.samsung.da.options": ["MixedLoadBell_Enable"]}
+        path, body = self._desc().write_fn("Off", rep)
+        assert body == {"x.com.samsung.da.options": ["MixedLoadBell_Disable"]}
+
+    def test_write_rejects_non_on_off_payload(self):
+        rep = {"x.com.samsung.da.options": ["MixedLoadBell_Disable"]}
+        assert self._desc().write_fn("bogus", rep) is None
+
+    def test_write_needs_a_populated_options_array(self):
+        assert self._desc().write_fn("On", {}) is None
+
+
+class TestWrinklePreventActive:
+    """Wrinkle-prevent running indicator over /course/vs/0's options[] array."""
+
+    @staticmethod
+    def _desc():
+        return next(e for e in dryer.DRYER_COURSE.entities if e.key == "wrinkle_prevent_active")
+
+    def test_exists_only_when_token_present(self):
+        assert self._desc().exists_fn({"x.com.samsung.da.options": []}, {}) is False
+        rep = {"x.com.samsung.da.options": ["WrinklePreventRunning_Off"]}
+        assert self._desc().exists_fn(rep, {}) is True
+
+    def test_reads_on_and_off(self):
+        rep = lambda token: {"x.com.samsung.da.options": [token]}  # noqa: E731
+        assert self._desc().rep_fn(rep("WrinklePreventRunning_On")) is True
+        assert self._desc().rep_fn(rep("WrinklePreventRunning_Off")) is False
 
 
 def _dv6800n():
