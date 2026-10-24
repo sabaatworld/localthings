@@ -1837,6 +1837,9 @@
       },
       "extra_rinse": {
         "name": "Extra plákanie"
+      },
+      "drum_light": {
+        "name": "Osvetlenie bubna"
       }
     },
     "time": {

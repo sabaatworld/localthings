@@ -1837,6 +1837,9 @@
       },
       "extra_rinse": {
         "name": "Extra spoelen"
+      },
+      "drum_light": {
+        "name": "Trommellicht"
       }
     },
     "time": {

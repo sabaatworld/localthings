@@ -1837,6 +1837,9 @@
       },
       "extra_rinse": {
         "name": "Extra-Spülen"
+      },
+      "drum_light": {
+        "name": "Trommellicht"
       }
     },
     "time": {

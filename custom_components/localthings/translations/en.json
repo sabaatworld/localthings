@@ -1837,6 +1837,9 @@
       },
       "extra_rinse": {
         "name": "Extra rinse"
+      },
+      "drum_light": {
+        "name": "Drum light"
       }
     },
     "time": {

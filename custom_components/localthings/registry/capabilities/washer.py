@@ -616,6 +616,15 @@ WASHER_COURSE = Capability(
             table_href="/st/washercourse/vs/0",
             display_fn=_washer_course_label,
         ),
+        # Drum light (the lamp inside the drum) -- same DrumLight_On/Off
+        # options[] token and switch shape as dryer.DRYER_COURSE; see the
+        # comment there for the confirmed read/write behaviour.
+        bool_option_switch(
+            "drum_light",
+            "mdi:lightbulb",
+            "DrumLight",
+            gate_on_presence=True,
+        ),
         _bool_option_switch(
             "extra_rinse",
             "mdi:water-plus",

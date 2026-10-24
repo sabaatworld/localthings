@@ -1837,6 +1837,9 @@
       },
       "extra_rinse": {
         "name": "헹굼 추가"
+      },
+      "drum_light": {
+        "name": "통 조명"
       }
     },
     "time": {

@@ -1837,6 +1837,9 @@
       },
       "extra_rinse": {
         "name": "Dodatkowe płukanie"
+      },
+      "drum_light": {
+        "name": "Oświetlenie bębna"
       }
     },
     "time": {

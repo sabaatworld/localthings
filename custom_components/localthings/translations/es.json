@@ -2180,6 +2180,9 @@
       },
       "extra_rinse": {
         "name": "Aclarado extra"
+      },
+      "drum_light": {
+        "name": "Luz del tambor"
       }
     },
     "time": {

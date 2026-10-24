@@ -1837,6 +1837,9 @@
       },
       "extra_rinse": {
         "name": "Extra máchání"
+      },
+      "drum_light": {
+        "name": "Osvětlení bubnu"
       }
     },
     "time": {

@@ -1837,6 +1837,9 @@
       },
       "extra_rinse": {
         "name": "Risciacquo extra"
+      },
+      "drum_light": {
+        "name": "Luce cestello"
       }
     },
     "time": {

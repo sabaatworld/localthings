@@ -17,6 +17,7 @@ from .laundry import (
     OPTION_KIND_DRY,
     OPTION_KIND_DRY_TIME,
     bool_option_exists,
+    bool_option_switch,
     course_narrowed_options,
     cycle_select,
     drum_clean_cycles_remaining,
@@ -177,6 +178,18 @@ DRYER_COURSE = Capability(
             # Verbatim: an unknown code renders as-is instead of falling
             # into select._display's cosmetic camel-split (`3E` → `3 E`).
             display_fn=lambda value, resources: value,
+        ),
+        # Drum light (the lamp inside the drum): a DrumLight_On/Off options[]
+        # token on this same href, shared with washer.WASHER_COURSE. Primary
+        # switch, not a config setting: the token reads the *actual* lamp --
+        # on while the door is open, off when closed, and a panel toggle
+        # shows up too. All confirmed live on a DVE53BB8900TA3, as was the
+        # write (2.04 Changed, dryer powered off).
+        bool_option_switch(
+            "drum_light",
+            "mdi:lightbulb",
+            "DrumLight",
+            gate_on_presence=True,
         ),
         SwitchDesc(
             key="damp_alert",
