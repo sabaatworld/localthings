@@ -1914,6 +1914,9 @@
       },
       "hood_do_not_disturb": {
         "name": "Non disturbare"
+      },
+      "buzzer_sound": {
+        "name": "Suono cicalino"
       }
     },
     "time": {

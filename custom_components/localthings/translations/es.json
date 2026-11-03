@@ -2257,6 +2257,9 @@
       },
       "hood_do_not_disturb": {
         "name": "No molestar"
+      },
+      "buzzer_sound": {
+        "name": "Volumen"
       }
     },
     "time": {

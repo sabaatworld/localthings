@@ -1914,6 +1914,9 @@
       },
       "hood_do_not_disturb": {
         "name": "Nicht stören"
+      },
+      "buzzer_sound": {
+        "name": "Signalton"
       }
     },
     "time": {

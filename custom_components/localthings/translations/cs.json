@@ -1914,6 +1914,9 @@
       },
       "hood_do_not_disturb": {
         "name": "Nerušit"
+      },
+      "buzzer_sound": {
+        "name": "Zvuk bzučáku"
       }
     },
     "time": {

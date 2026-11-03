@@ -1914,6 +1914,9 @@
       },
       "hood_do_not_disturb": {
         "name": "Do not disturb"
+      },
+      "buzzer_sound": {
+        "name": "Buzzer sound"
       }
     },
     "time": {
