@@ -1098,6 +1098,14 @@
           "low": "Laag",
           "high": "Hoog"
         }
+      },
+      "smart_ventilate_mode": {
+        "name": "Modus voor slim ventileren",
+        "state": {
+          "sensing": "Alleen detecteren",
+          "alarm": "Meldingen ontvangen",
+          "airpurify": "Stil ventileren"
+        }
       }
     },
     "sensor": {
@@ -1586,6 +1594,66 @@
       },
       "auto_changeover_heat_secondary_offset": {
         "name": "Automatisch omschakelen secundaire offset verwarmen"
+      },
+      "air_sensing_interval": {
+        "name": "Interval luchtmeting"
+      },
+      "range_hood_pm10": {
+        "name": "PM10"
+      },
+      "range_hood_pm10_air_quality": {
+        "name": "PM10 luchtkwaliteit",
+        "state": {
+          "good": "Goed",
+          "normal": "Normaal",
+          "poor": "Slecht",
+          "very_poor": "Zeer slecht",
+          "processing": "Bezig met verwerken"
+        }
+      },
+      "range_hood_pm25": {
+        "name": "PM2.5"
+      },
+      "range_hood_pm25_air_quality": {
+        "name": "PM2.5 luchtkwaliteit",
+        "state": {
+          "good": "Goed",
+          "normal": "Normaal",
+          "poor": "Slecht",
+          "very_poor": "Zeer slecht",
+          "processing": "Bezig met verwerken"
+        }
+      },
+      "range_hood_pm1": {
+        "name": "PM1.0"
+      },
+      "range_hood_pm1_air_quality": {
+        "name": "PM1.0 luchtkwaliteit",
+        "state": {
+          "good": "Goed",
+          "normal": "Normaal",
+          "poor": "Slecht",
+          "very_poor": "Zeer slecht",
+          "processing": "Bezig met verwerken"
+        }
+      },
+      "range_hood_last_air_sensing_level": {
+        "name": "Laatste luchtmeetniveau",
+        "state": {
+          "good": "Goed",
+          "normal": "Normaal",
+          "poor": "Slecht",
+          "very_poor": "Zeer slecht"
+        }
+      },
+      "range_hood_clean_level": {
+        "name": "Reinigingsniveau",
+        "state": {
+          "good": "Goed",
+          "normal": "Normaal",
+          "poor": "Slecht",
+          "very_poor": "Zeer slecht"
+        }
       }
     },
     "switch": {
@@ -1840,6 +1908,12 @@
       },
       "drum_light": {
         "name": "Trommellicht"
+      },
+      "smart_ventilate": {
+        "name": "Slim ventileren"
+      },
+      "hood_do_not_disturb": {
+        "name": "Niet storen"
       }
     },
     "time": {
@@ -1869,6 +1943,12 @@
       },
       "sensing_skip_start": {
         "name": "Start AI Purify meting overslaan"
+      },
+      "hood_do_not_disturb_start": {
+        "name": "Begin niet storen"
+      },
+      "hood_do_not_disturb_end": {
+        "name": "Einde niet storen"
       }
     },
     "water_heater": {
