@@ -59,10 +59,11 @@ HOOD_ALARMS = Capability(
     entities=(
         SensorDesc(
             key="alarm_code",
-            field="x.com.samsung.da.items",
             icon="mdi:alert",
             entity_category="diagnostic",
-            value_fn=_active_alarm_codes,
+            # Like common.ALARMS, a present resource need not contain items
+            # when clear; metadata must not suppress the sensor at setup.
+            rep_fn=lambda rep: _active_alarm_codes(rep.get("x.com.samsung.da.items")),
         ),
     ),
 )
